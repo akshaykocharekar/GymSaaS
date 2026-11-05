@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8787";
+const RAW = import.meta.env.VITE_API_URL || "http://localhost:8787";
+const API_URL = RAW.replace(/\/+$/, ""); // strip trailing slashes
 
 export class ApiError extends Error {
   status: number;
@@ -26,7 +27,8 @@ async function request<T>(
     if (token) finalHeaders["Authorization"] = `Bearer ${token}`;
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const res = await fetch(`${API_URL}${normalizedPath}`, {
     ...rest,
     headers: finalHeaders,
   });
