@@ -1,7 +1,13 @@
 import { Hono } from "hono";
-import { activationSchema, GYM_STATUS, TRIAL_DAYS } from "@gymora/shared";
+import {
+  activationSchema,
+  GYM_STATUS,
+  TRIAL_DAYS,
+  DEFAULT_PLANS,
+} from "@gymora/shared";
 import { getDb } from "@gymora/db";
 import { GymRepo } from "../repositories/gyms.js";
+import { PlanRepo } from "../repositories/plans.js";
 import { hashCode } from "../lib/crypto.js";
 import { HTTPException } from "hono/http-exception";
 
@@ -10,7 +16,8 @@ export const activationRoutes = new Hono();
 activationRoutes.post("/validate", async (c) => {
   const body = await c.req.json();
   const input = activationSchema.parse(body);
-  const gyms = new GymRepo(getDb());
+  const db = getDb();
+  const gyms = new GymRepo(db);
 
   const gym = await gyms.findByEmail(input.email);
   if (!gym) throw new HTTPException(404, { message: "No gym found for this email" });
@@ -19,9 +26,7 @@ activationRoutes.post("/validate", async (c) => {
     throw new HTTPException(409, { message: "Gym is already activated" });
   }
   if (gym.status !== GYM_STATUS.APPROVED) {
-    throw new HTTPException(403, {
-      message: `Gym is not approved (status: ${gym.status})`,
-    });
+    throw new HTTPException(403, { message: `Gym is not approved (status: ${gym.status})` });
   }
   if (!gym.activationCodeHash || !gym.activationCodeExpiresAt) {
     throw new HTTPException(400, { message: "No activation code issued" });
@@ -39,7 +44,7 @@ activationRoutes.post("/validate", async (c) => {
   }
 
   const now = new Date();
-  const trialExpires = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+  const trialExpires = new Date(now.getTime() + TRIAL_DAYS * 86_400_000);
 
   const updated = await gyms.updateById(gym._id!.toString(), {
     status: GYM_STATUS.ACTIVE_TRIAL,
@@ -47,6 +52,10 @@ activationRoutes.post("/validate", async (c) => {
     trialExpiresAt: trialExpires,
     activationCodeUsedAt: now,
   });
+
+  // Seed default plans (idempotent per activation — gym is fresh here)
+  const plans = new PlanRepo(db);
+  await plans.seedDefaults(gym._id!, DEFAULT_PLANS);
 
   return c.json({
     ok: true,

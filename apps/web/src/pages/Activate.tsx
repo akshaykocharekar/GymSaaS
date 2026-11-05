@@ -29,7 +29,12 @@ export default function Activate() {
     return (
       <div className="min-h-screen flex items-center justify-center p-6">
         <div className="max-w-md w-full bg-white rounded-xl shadow-sm p-8 text-center space-y-4">
-          <div className="text-5xl">✅</div>
+         <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+    <rect x="3" y="11" width="18" height="11" rx="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+</div>
           <h1 className="text-2xl font-bold">Trial activated!</h1>
           <p className="text-slate-600">
             Your 30-day trial has started. Log in to access your dashboard.

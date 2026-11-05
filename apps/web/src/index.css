@@ -1,6 +1,21 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { @apply bg-surface text-slate-800; }
+body {
+  @apply bg-surface text-slate-800 antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+/* Hide horizontal scrollbar on filter pills */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Prevent iOS zoom on inputs */
+input, select, textarea { font-size: 16px; }
+@media (min-width: 640px) {
+  input, select, textarea { font-size: 14px; }
+}

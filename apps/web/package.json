@@ -11,6 +11,7 @@
     "lint": "echo 'lint not configured yet' && exit 0"
   },
   "dependencies": {
+    "@gymora/shared": "workspace:^",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0"
