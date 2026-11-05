@@ -66,7 +66,7 @@ function IconArrow() {
 }
 
 /* ─── Scroll reveal (respects reduced motion) ─────────── */
-function Reveal({ children, delay = 0, className = "" }) {
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
   const [shown, setShown] = useState(false);
 
@@ -108,7 +108,7 @@ function Reveal({ children, delay = 0, className = "" }) {
 }
 
 /* ─── Section heading ─────────────────────────────────── */
-function SectionHead({ eyebrow, title, children }) {
+function SectionHead({ eyebrow, title, children }: { eyebrow: string; title: string; children?: React.ReactNode }) {
   return (
     <div className="max-w-2xl mb-10 sm:mb-14">
       <div className="inline-flex items-center gap-2 text-xs font-medium text-orange-400 uppercase tracking-[0.18em] mb-4">

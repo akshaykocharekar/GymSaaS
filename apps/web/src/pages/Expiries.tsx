@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api.js";
-import { useAuth } from "../context/AuthContext.js";
+import { useGym } from "../context/GymContext.js";
 import Badge from "../components/ui/Badge.js";
 import Card from "../components/ui/Card.js";
 import EmptyState from "../components/ui/EmptyState.js";
@@ -56,7 +56,7 @@ const bucketDefs: Omit<Bucket, "members">[] = [
 ];
 
 export default function Expiries() {
-  const { user } = useAuth();
+  const { gym } = useGym();
   const [buckets, setBuckets] = useState<Bucket[] | null>(null);
   const [waMember, setWaMember] = useState<Member | null>(null);
 
