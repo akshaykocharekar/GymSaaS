@@ -1,10 +1,8 @@
-import { useEffect, useState, useCallback } from "react";
+import { ReactNode, useEffect, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../../lib/api.js";
-import Card from "../../components/ui/Card.js";
 import Badge from "../../components/ui/Badge.js";
 import Button from "../../components/ui/Button.js";
-import Skeleton from "../../components/ui/Skeleton.js";
 import RelativeTime from "../../components/admin/RelativeTime.js";
 import { useToast } from "../../components/Toast.js";
 
@@ -34,6 +32,24 @@ interface Payment {
   paymentType: string;
   status: string;
   createdAt: string;
+}
+
+/* Dark glass panel (matches the landing/dashboard cards) */
+function Panel({ children }: { children: ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+      {children}
+    </div>
+  );
+}
+
+function PanelTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="mb-4 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-orange-400">
+      <span className="h-px w-4 bg-orange-400/60" />
+      {children}
+    </h2>
+  );
 }
 
 export default function AdminGymDetail() {
@@ -77,8 +93,8 @@ export default function AdminGymDetail() {
   if (!gym) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-3">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-40 w-full" />
+        <div className="h-8 w-48 animate-pulse rounded-lg bg-white/[0.08]" />
+        <div className="h-40 w-full animate-pulse rounded-2xl bg-white/[0.06]" />
       </div>
     );
   }
@@ -94,24 +110,24 @@ export default function AdminGymDetail() {
       {/* Header */}
       <div className="flex flex-wrap items-start gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900 truncate">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white truncate max-w-full">
               {gym.name}
             </h1>
             <Badge status={gym.status} />
           </div>
-          <div className="text-sm text-slate-500 mt-0.5">
+          <div className="text-sm text-stone-500 mt-1">
             {gym.ownerName} · registered <RelativeTime date={gym.createdAt} />
           </div>
         </div>
       </div>
 
       {approvalCode && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
-          <div className="text-[11px] font-medium uppercase tracking-wider text-emerald-700">
+        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-400/[0.07] p-4">
+          <div className="text-[11px] font-medium uppercase tracking-[0.18em] text-emerald-300">
             Activation code
           </div>
-          <div className="mt-1 font-mono text-lg text-emerald-900 select-all">
+          <div className="mt-1.5 font-mono text-xl text-white select-all break-all">
             {approvalCode}
           </div>
           <button
@@ -119,7 +135,7 @@ export default function AdminGymDetail() {
               navigator.clipboard.writeText(approvalCode);
               toast.show("Copied");
             }}
-            className="mt-1 text-xs text-emerald-700 hover:underline font-medium"
+            className="mt-3 rounded-full border border-emerald-400/30 px-3.5 py-1.5 text-xs font-medium text-emerald-300 transition-colors hover:bg-emerald-400/10 hover:text-emerald-200"
           >
             Copy
           </button>
@@ -129,11 +145,9 @@ export default function AdminGymDetail() {
       <div className="grid md:grid-cols-3 gap-4">
         {/* Left: info + actions */}
         <div className="md:col-span-2 space-y-4">
-          <Card className="p-5">
-            <h2 className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-3">
-              Details
-            </h2>
-            <div className="space-y-2.5">
+          <Panel>
+            <PanelTitle>Details</PanelTitle>
+            <div className="space-y-3">
               <Row label="Email" value={gym.email} mono />
               <Row label="Phone" value={gym.phone} />
               <Row label="Address" value={gym.address} />
@@ -172,13 +186,11 @@ export default function AdminGymDetail() {
                 />
               )}
             </div>
-          </Card>
+          </Panel>
 
           {(canApprove || canReject || canResend || canSuspend || canReactivate) && (
-            <Card className="p-5">
-              <h2 className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-3">
-                Actions
-              </h2>
+            <Panel>
+              <PanelTitle>Actions</PanelTitle>
               <div className="flex flex-wrap gap-2">
                 {canApprove && (
                   <Button
@@ -242,29 +254,27 @@ export default function AdminGymDetail() {
                   </Button>
                 )}
               </div>
-            </Card>
+            </Panel>
           )}
         </div>
 
         {/* Right: payments */}
         <div>
-          <Card className="p-5">
-            <h2 className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-3">
-              Payments
-            </h2>
+          <Panel>
+            <PanelTitle>Payments</PanelTitle>
             {payments.length === 0 ? (
-              <p className="text-sm text-slate-500">None yet</p>
+              <p className="text-sm text-stone-500">None yet</p>
             ) : (
-              <div className="space-y-3">
+              <div className="divide-y divide-white/5">
                 {payments.map((p) => (
-                  <div key={p.id} className="text-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium text-slate-900">
+                  <div key={p.id} className="text-sm py-3 first:pt-0 last:pb-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="font-semibold text-white">
                         ₹{(p.amount / 100).toLocaleString("en-IN")}
                       </div>
                       <Badge status={p.status} />
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
+                    <div className="text-[11px] text-stone-500 mt-1">
                       {p.paymentType === "SOFTWARE_PURCHASE"
                         ? "Licence"
                         : "Maintenance"}{" "}
@@ -274,7 +284,7 @@ export default function AdminGymDetail() {
                 ))}
               </div>
             )}
-          </Card>
+          </Panel>
         </div>
       </div>
     </div>
@@ -294,12 +304,12 @@ function Row({
 }) {
   return (
     <div className="flex justify-between gap-4 text-sm">
-      <span className="text-slate-500 shrink-0">{label}</span>
+      <span className="text-stone-500 shrink-0">{label}</span>
       <span
         className={`text-right break-all ${
           tone === "danger"
-            ? "text-rose-700 font-medium"
-            : "text-slate-900"
+            ? "text-rose-300 font-medium"
+            : "text-stone-100"
         } ${mono ? "font-mono text-[13px]" : ""}`}
       >
         {value}

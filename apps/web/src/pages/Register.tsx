@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, ReactNode, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { api, ApiError } from "../lib/api.js";
 
 /* ─── Shared dark field (same props as FormField) ─────── */
@@ -36,7 +36,7 @@ function Field({ label, name, type = "text", value, onChange, autoComplete, requ
 /* ─── Page shell: charcoal + grid + orange glow ───────── */
 function Shell({ children }: { children: ReactNode }) {
   return (
-    <div className="relative isolate min-h-screen overflow-x-hidden bg-[#0c0a09] text-stone-200 antialiased selection:bg-orange-400/30">
+    <div className="relative isolate min-h-screen overflow-x-clip bg-[#0c0a09] text-stone-200 antialiased selection:bg-orange-400/30">
       <div
         className="absolute inset-0 -z-10 opacity-[0.35]"
         style={{
@@ -80,8 +80,6 @@ export default function Register() {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [params] = useSearchParams();
-  const statusParam = params.get("status");
   const [busy, setBusy] = useState(false);
 
   function update(k: keyof typeof form) {
@@ -103,7 +101,7 @@ export default function Register() {
     }
   }
 
-  if (submitted || statusParam === "pending") {
+  if (submitted) {
     return (
       <Shell>
         <div className="w-full rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center backdrop-blur space-y-4">

@@ -16,7 +16,7 @@ export default function ActionMenu({ items }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) return undefined;
     const handler = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {
         setOpen(false);
@@ -32,8 +32,14 @@ export default function ActionMenu({ items }: Props) {
     <div ref={ref} className="relative inline-block">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="w-8 h-8 rounded hover:bg-slate-100 flex items-center justify-center"
+        className={`flex h-9 w-9 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60 ${
+          open
+            ? "bg-white/[0.10] text-white"
+            : "text-stone-400 hover:bg-white/[0.08] hover:text-white"
+        }`}
         aria-label="Actions"
+        aria-haspopup="menu"
+        aria-expanded={open}
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="5" cy="12" r="1.8" />
@@ -42,17 +48,23 @@ export default function ActionMenu({ items }: Props) {
         </svg>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg py-1 min-w-[180px] z-30">
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-30 mt-1.5 min-w-[190px] rounded-xl border border-white/10 bg-[#1a1613] p-1.5 text-left shadow-xl shadow-black/50"
+        >
           {items.map((item, i) => (
             <button
               key={i}
+              role="menuitem"
               onClick={() => {
                 setOpen(false);
                 item.onClick();
               }}
               disabled={item.disabled}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed ${
-                item.danger ? "text-rose-700" : "text-slate-700"
+              className={`w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                item.danger
+                  ? "text-rose-300 hover:bg-rose-400/10 hover:text-rose-200"
+                  : "text-stone-200 hover:bg-white/[0.07] hover:text-white"
               }`}
             >
               {item.label}

@@ -51,29 +51,32 @@ export default function AdminDashboard() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
           Overview
         </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <p className="text-sm text-stone-500 mt-1">
           Platform health at a glance
         </p>
       </div>
 
       {/* Attention strip — only if something needs action */}
       {needsAttention > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex flex-wrap items-center gap-3">
-          <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-          <div className="text-sm text-amber-900 flex-1 min-w-0">
+        <div className="relative overflow-hidden rounded-2xl border border-amber-400/20 bg-amber-400/[0.07] px-4 py-3.5 flex flex-wrap items-center gap-3">
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-60" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
+          </span>
+          <div className="text-sm text-amber-100/90 flex-1 min-w-0">
             {stats!.counts.pending > 0 && (
               <>
-                <strong>{stats!.counts.pending}</strong> pending approval
+                <strong className="font-semibold text-white">{stats!.counts.pending}</strong> pending approval
                 {stats!.counts.pending > 1 ? "s" : ""}
               </>
             )}
             {stats!.counts.pending > 0 && stats!.counts.expired > 0 && " · "}
             {stats!.counts.expired > 0 && (
               <>
-                <strong>{stats!.counts.expired}</strong> expired trial
+                <strong className="font-semibold text-white">{stats!.counts.expired}</strong> expired trial
                 {stats!.counts.expired > 1 ? "s" : ""}
               </>
             )}
@@ -82,7 +85,7 @@ export default function AdminDashboard() {
             {stats!.counts.pending > 0 && (
               <Link
                 to="/admin/registrations"
-                className="px-2.5 py-1 bg-amber-900 text-white rounded font-medium hover:bg-amber-800"
+                className="rounded-full bg-amber-300 px-3.5 py-1.5 font-semibold text-amber-950 transition hover:bg-amber-200 active:scale-[0.98]"
               >
                 Review pending
               </Link>
@@ -140,40 +143,40 @@ export default function AdminDashboard() {
 
       {/* Recent gyms */}
       <div>
-        <div className="flex items-baseline justify-between mb-2">
-          <h2 className="text-sm font-semibold text-slate-900">
+        <div className="flex items-baseline justify-between mb-3">
+          <h2 className="text-sm font-semibold text-white">
             Recently registered
           </h2>
           <Link
             to="/admin/gyms"
-            className="text-xs text-slate-500 hover:text-slate-900"
+            className="text-xs font-medium text-orange-300 transition-colors hover:text-orange-200"
           >
             View all →
           </Link>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] divide-y divide-white/5">
           {!recent
             ? Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="p-3 flex gap-3">
-                  <div className="h-4 bg-slate-100 rounded flex-1 animate-pulse" />
+                <div key={i} className="p-4 flex gap-3">
+                  <div className="h-4 bg-white/[0.06] rounded-lg flex-1 animate-pulse" />
                 </div>
               ))
             : recent.map((g) => (
                 <Link
                   key={g.id}
                   to={`/admin/gyms/${g.id}`}
-                  className="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-slate-900 truncate">
+                    <div className="text-sm font-medium text-white truncate">
                       {g.name}
                     </div>
-                    <div className="text-xs text-slate-500 truncate">
+                    <div className="text-xs text-stone-500 truncate">
                       {g.email}
                     </div>
                   </div>
                   <Badge status={g.status} />
-                  <div className="text-xs text-slate-400 w-16 text-right">
+                  <div className="text-xs text-stone-500 w-16 text-right">
                     <RelativeTime date={g.createdAt} />
                   </div>
                 </Link>

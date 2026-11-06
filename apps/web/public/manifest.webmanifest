@@ -1,25 +1,78 @@
 {
-  "name": "Gymora — Gym Management",
+  "id": "/app/dashboard",
+  "name": "Gymora: Gym Management",
   "short_name": "Gymora",
-  "description": "Manage members, payments, renewals for your gym.",
-  "start_url": "/app/dashboard",
+  "description": "Manage members, payments, and renewals for your gym.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/app/dashboard?source=pwa",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
   "background_color": "#fafafa",
   "theme_color": "#0a0a0b",
+  "categories": ["business", "productivity", "fitness"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Members",
+      "short_name": "Members",
+      "url": "/app/members?source=shortcut",
+      "icons": [{ "src": "/shortcut-members-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Payments",
+      "short_name": "Payments",
+      "url": "/app/payments?source=shortcut",
+      "icons": [{ "src": "/shortcut-payments-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Renewals",
+      "short_name": "Renewals",
+      "url": "/app/renewals?source=shortcut",
+      "icons": [{ "src": "/shortcut-renewals-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard-mobile.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard overview"
+    },
+    {
+      "src": "/screenshots/dashboard-desktop.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Members and payments on desktop"
     }
   ]
 }

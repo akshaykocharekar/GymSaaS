@@ -1,25 +1,34 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./index.html", "./src/**/*.{ts,tsx}"],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
       colors: {
+        // Brand accent: was indigo, now warm orange (Tailwind's orange scale).
+        // Any page still using primary-* picks this up automatically.
         primary: {
-          50: "#eef2ff",
-          100: "#e0e7ff",
-          200: "#c7d2fe",
-          300: "#a5b4fc",
-          400: "#818cf8",
-          500: "#6366f1",
-          600: "#4f46e5",
-          700: "#4338ca",
-          800: "#3730a3",
-          900: "#312e81",
+          50: "#fff7ed",
+          100: "#ffedd5",
+          200: "#fed7aa",
+          300: "#fdba74",
+          400: "#fb923c",
+          500: "#f97316",
+          600: "#ea580c",
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
         },
-        surface: "#fafafa",
-        success: "#16a34a",
-        warning: "#d97706",
-        danger: "#dc2626",
+        // App background: was #fafafa, now warm charcoal.
+        // `bg-surface` still works; `surface-raised` is for cards/panels.
+        surface: {
+          DEFAULT: "#0c0a09",
+          raised: "#14110f",
+          card: "#120f0d",
+        },
+        // Status colors, brightened so they read on a dark background.
+        success: "#10b981",
+        warning: "#f59e0b",
+        danger: "#f43f5e",
       },
       fontFamily: {
         sans: [
@@ -32,9 +41,10 @@ export default {
         ],
       },
       boxShadow: {
-        card: "0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.06)",
-        elevated: "0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 6px -2px rgb(0 0 0 / 0.06)",
-        fab: "0 8px 20px -4px rgb(79 70 229 / 0.4)",
+        // Dark UIs need deeper shadows to show any depth.
+        card: "0 1px 2px 0 rgb(0 0 0 / 0.4), 0 1px 3px 0 rgb(0 0 0 / 0.3)",
+        elevated: "0 8px 24px -4px rgb(0 0 0 / 0.5), 0 2px 8px -2px rgb(0 0 0 / 0.4)",
+        fab: "0 8px 24px -4px rgb(249 115 22 / 0.45)",
       },
     },
   },

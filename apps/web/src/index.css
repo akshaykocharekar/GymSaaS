@@ -4,10 +4,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark app: native controls (scrollbars, date pickers, selects) follow the theme,
+   and the area behind the page (overscroll / rubber-band) matches it too. */
+html {
+  color-scheme: dark;
+  background-color: #0c0a09;
+}
+
 html, body, #root { height: 100%; }
+
 body {
-  @apply bg-surface text-slate-800 antialiased;
+  background-color: #0c0a09;
+  color: #e7e5e4; /* stone-200 */
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Hide horizontal scrollbar on filter pills */
@@ -19,3 +30,28 @@ input, select, textarea { font-size: 16px; }
 @media (min-width: 640px) {
   input, select, textarea { font-size: 14px; }
 }
+
+/* Browser autofill paints inputs light yellow/blue, which clashes with dark fields */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: #ffffff;
+  caret-color: #ffffff;
+  box-shadow: 0 0 0 1000px #1a1613 inset;
+  transition: background-color 9999s ease-out 0s;
+}
+
+/* Subtle dark scrollbars */
+* { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.18) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.26); background-clip: content-box; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+
