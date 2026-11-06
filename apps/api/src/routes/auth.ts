@@ -10,7 +10,7 @@ import { getDb } from "@gymora/db";
 import { GymRepo } from "../repositories/gyms.js";
 import { UserRepo } from "../repositories/users.js";
 import { hashPassword, verifyPassword } from "../lib/password.js";
-import { signAccess, signRefresh } from "../lib/jwt.js";
+import { signAccess, signRefresh, verifyRefresh } from "../lib/jwt.js";
 import { HTTPException } from "hono/http-exception";
 
 export const authRoutes = new Hono();
@@ -38,7 +38,6 @@ authRoutes.post("/register-gym", async (c) => {
     throw new HTTPException(409, { message: "Email already registered" });
   }
 
-  // MX record check — email domain must have a mail server
   const hasMx = await hasMxRecord(input.email);
   if (!hasMx) {
     throw new HTTPException(400, {
@@ -129,4 +128,30 @@ authRoutes.post("/login", async (c) => {
     },
     gymStatus,
   });
+});
+
+// ─── Refresh access token ──────────────────────────────
+authRoutes.post("/refresh", async (c) => {
+  const body = await c.req.json();
+  const refreshToken = body?.refreshToken;
+  if (!refreshToken) {
+    throw new HTTPException(400, { message: "Missing refreshToken" });
+  }
+  let payload;
+  try {
+    payload = verifyRefresh(refreshToken);
+  } catch {
+    throw new HTTPException(401, { message: "Invalid refresh token" });
+  }
+  const users = new UserRepo(getDb());
+  const user = await users.findById(payload.sub);
+  if (!user || user.status !== "ACTIVE") {
+    throw new HTTPException(401, { message: "User inactive" });
+  }
+  const newAccess = signAccess({
+    sub: payload.sub,
+    role: payload.role,
+    gymId: payload.gymId,
+  });
+  return c.json({ ok: true, accessToken: newAccess });
 });

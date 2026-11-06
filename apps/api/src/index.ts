@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { env } from "./env.js";
 import { errorHandler } from "./middleware/error.js";
+import { trialGuard } from "./middleware/trialGuard.js";
 import { connect, ping } from "@gymora/db";
 import { authRoutes } from "./routes/auth.js";
 import { activationRoutes } from "./routes/activation.js";
@@ -13,6 +14,8 @@ import { paymentRoutes } from "./routes/payments.js";
 import { reportsRoutes } from "./routes/reports.js";
 import { dashboardRoutes } from "./routes/dashboard.js";
 import { profileRoutes } from "./routes/profile.js";
+import { licenceRoutes } from "./routes/licence.js";
+import { webhookRoutes } from "./routes/webhook.js";
 
 const app = new Hono();
 
@@ -30,15 +33,26 @@ app.get("/health", async (c) => {
   });
 });
 
+// Public
 app.route("/api/auth", authRoutes);
 app.route("/api/activation", activationRoutes);
 app.route("/api/admin", adminRoutes);
+app.route("/api/webhooks", webhookRoutes); // public — signature-verified
+
+// Gym-scoped: licence endpoints are NOT behind trial guard
+app.route("/api/gym/licence", licenceRoutes);
+app.route("/api/gym/profile", profileRoutes);
+
+// All other gym data: gated by trialGuard
+app.use("/api/gym/plans/*", trialGuard());
+app.use("/api/gym/members/*", trialGuard());
+app.use("/api/gym/payments/*", trialGuard());
+app.use("/api/gym/reports/*", trialGuard());
 app.route("/api/gym/plans", planRoutes);
 app.route("/api/gym/members", memberRoutes);
 app.route("/api/gym/payments", paymentRoutes);
 app.route("/api/gym/reports", reportsRoutes);
 app.route("/api/gym/dashboard", dashboardRoutes);
-app.route("/api/gym/profile", profileRoutes);
 
 app.get("/", (c) => c.text("Gymora API"));
 

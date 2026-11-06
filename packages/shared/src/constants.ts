@@ -1,4 +1,4 @@
-// ─── Gym lifecycle statuses (PRD §6) ────────────────────
+// ─── Gym lifecycle statuses ──────────────────────────────
 export const GYM_STATUS = {
   PENDING_APPROVAL: "PENDING_APPROVAL",
   APPROVED: "APPROVED",
@@ -11,7 +11,6 @@ export const GYM_STATUS = {
 } as const;
 export type GymStatus = (typeof GYM_STATUS)[keyof typeof GYM_STATUS];
 
-// ─── User roles (PRD §9) ────────────────────────────────
 export const ROLES = {
   SUPERADMIN: "SUPERADMIN",
   OWNER: "OWNER",
@@ -19,7 +18,6 @@ export const ROLES = {
 } as const;
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
-// ─── Staff permissions (locked for v1) ──────────────────
 export const PERMISSIONS = {
   MANAGE_MEMBERS: "MANAGE_MEMBERS",
   RECORD_PAYMENTS: "RECORD_PAYMENTS",
@@ -27,7 +25,6 @@ export const PERMISSIONS = {
 } as const;
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
-// ─── Member statuses ────────────────────────────────────
 export const MEMBER_STATUS = {
   ACTIVE: "ACTIVE",
   EXPIRED: "EXPIRED",
@@ -35,7 +32,6 @@ export const MEMBER_STATUS = {
 } as const;
 export type MemberStatus = (typeof MEMBER_STATUS)[keyof typeof MEMBER_STATUS];
 
-// ─── Membership plan types ──────────────────────────────
 export const PLAN_TYPE = {
   MONTHLY: "MONTHLY",
   QUARTERLY: "QUARTERLY",
@@ -45,7 +41,6 @@ export const PLAN_TYPE = {
 } as const;
 export type PlanType = (typeof PLAN_TYPE)[keyof typeof PLAN_TYPE];
 
-// ─── Manual payment methods ─────────────────────────────
 export const PAYMENT_METHOD = {
   CASH: "CASH",
   UPI: "UPI",
@@ -53,7 +48,6 @@ export const PAYMENT_METHOD = {
 } as const;
 export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
 
-// ─── Gymora licence payment types / statuses ────────────
 export const LICENCE_PAYMENT_TYPE = {
   SOFTWARE_PURCHASE: "SOFTWARE_PURCHASE",
   MAINTENANCE: "MAINTENANCE",
@@ -71,22 +65,30 @@ export const LICENCE_PAYMENT_STATUS = {
 export type LicencePaymentStatus =
   (typeof LICENCE_PAYMENT_STATUS)[keyof typeof LICENCE_PAYMENT_STATUS];
 
-// ─── Business constants (PRD §2, §6) ────────────────────
+// ─── Business constants ─────────────────────────────────
 export const TRIAL_DAYS = 30;
-export const LICENCE_PRICE_PAISE = 199_900; // ₹1,999 in paise
-export const MAINTENANCE_PRICE_PAISE = 19_900; // ₹199 in paise
+
+// First-year licence: ₹1,999 (no separate maintenance in year 1)
+export const LICENCE_PRICE_PAISE = 199_900; // ₹1,999
+
+// Maintenance from year 2 onwards: ₹499/year
+export const MAINTENANCE_PRICE_PAISE = 49_900; // ₹499
 export const MAINTENANCE_DAYS = 365;
-export const MAX_MEMBERS_PER_GYM = 500; // fair-use soft cap
+
+// Maintenance becomes available for renewal 30 days before its expiry
+export const MAINTENANCE_RENEWAL_WINDOW_DAYS = 30;
+
+export const MAX_MEMBERS_PER_GYM = 500;
 export const MAX_MEMBERS_WARN_THRESHOLD = 450;
 
 // ─── Activation code ────────────────────────────────────
 export const ACTIVATION_CODE_PREFIX = "GYM";
-export const ACTIVATION_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
+export const ACTIVATION_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const ACTIVATION_CODE_GROUPS = 2;
 export const ACTIVATION_CODE_GROUP_LEN = 4;
 export const ACTIVATION_CODE_TTL_HOURS = 72;
 
-// ─── WhatsApp template variables (PRD §11) ──────────────
+// ─── WhatsApp ───────────────────────────────────────────
 export const WHATSAPP_VARIABLES = [
   "member_name",
   "gym_name",

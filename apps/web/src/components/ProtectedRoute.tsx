@@ -8,6 +8,15 @@ interface Props {
   redirectTo?: string;
 }
 
+const STATUS_ROUTES: Record<string, string> = {
+  PENDING_APPROVAL: "/register?status=pending",
+  APPROVED: "/activate",
+  TRIAL_EXPIRED: "/trial-expired",
+  SUSPENDED: "/trial-expired",
+  REJECTED: "/trial-expired",
+  CANCELLED: "/trial-expired",
+};
+
 export default function ProtectedRoute({
   roles,
   blockStatuses,
@@ -23,16 +32,24 @@ export default function ProtectedRoute({
     );
   }
   if (!user) return <Navigate to={redirectTo} replace />;
+
   if (roles && !roles.includes(user.role)) {
     return (
       <Navigate
-        to={user.role === "SUPERADMIN" ? "/admin/registrations" : "/app/dashboard"}
+        to={
+          user.role === "SUPERADMIN"
+            ? "/admin/registrations"
+            : "/app/dashboard"
+        }
         replace
       />
     );
   }
+
   if (blockStatuses && gymStatus && blockStatuses.includes(gymStatus)) {
-    return <Navigate to="/trial-expired" replace />;
+    const target = STATUS_ROUTES[gymStatus] || "/trial-expired";
+    return <Navigate to={target} replace />;
   }
+
   return <Outlet />;
 }

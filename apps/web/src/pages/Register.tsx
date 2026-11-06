@@ -1,5 +1,5 @@
 import { ChangeEvent, FormEvent, ReactNode, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { api, ApiError } from "../lib/api.js";
 
 /* ─── Shared dark field (same props as FormField) ─────── */
@@ -80,6 +80,8 @@ export default function Register() {
   });
   const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [params] = useSearchParams();
+  const statusParam = params.get("status");
   const [busy, setBusy] = useState(false);
 
   function update(k: keyof typeof form) {
@@ -101,7 +103,7 @@ export default function Register() {
     }
   }
 
-  if (submitted) {
+  if (submitted || statusParam === "pending") {
     return (
       <Shell>
         <div className="w-full rounded-3xl border border-white/10 bg-white/[0.03] p-8 text-center backdrop-blur space-y-4">

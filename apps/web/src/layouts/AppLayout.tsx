@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import BottomTabs from "./BottomTabs.js";
 import Sidebar from "./Sidebar.js";
 import MoreSheet from "./MoreSheet.js";
+import TrialBanner from "../components/TrialBanner.js";
 
 export default function AppLayout() {
   const [moreOpen, setMoreOpen] = useState(false);
@@ -11,6 +12,7 @@ export default function AppLayout() {
       <div className="flex">
         <Sidebar />
         <div className="flex-1 min-w-0 pb-20 lg:pb-0">
+          <TrialBanner />
           <Outlet />
         </div>
       </div>

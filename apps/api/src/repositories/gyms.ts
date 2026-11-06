@@ -1,4 +1,4 @@
-import { ObjectId, type Db, type Collection } from "mongodb";
+import { ObjectId, type Db, type Collection, type Filter } from "mongodb";
 import { COLLECTIONS } from "@gymora/db";
 import { GYM_STATUS, type GymStatus } from "@gymora/shared";
 
@@ -28,6 +28,7 @@ export class GymRepo {
   constructor(db: Db) {
     this.col = db.collection<GymDoc>(COLLECTIONS.GYMS);
   }
+
   findByEmail(email: string) {
     return this.col.findOne({ email: email.toLowerCase() });
   }
@@ -66,5 +67,45 @@ export class GymRepo {
   }
   listAll() {
     return this.col.find({}).sort({ createdAt: -1 }).toArray();
+  }
+
+  async listPaged(opts: {
+    search?: string;
+    status?: GymStatus;
+    limit: number;
+    offset: number;
+  }) {
+    const filter: Filter<GymDoc> = {};
+    if (opts.status) filter.status = opts.status;
+    if (opts.search && opts.search.trim()) {
+      const escaped = opts.search.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.$or = [
+        { name: { $regex: escaped, $options: "i" } },
+        { email: { $regex: escaped, $options: "i" } },
+        { ownerName: { $regex: escaped, $options: "i" } },
+        { phone: { $regex: escaped } },
+      ];
+    }
+    const [docs, total] = await Promise.all([
+      this.col
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(opts.offset)
+        .limit(opts.limit)
+        .toArray(),
+      this.col.countDocuments(filter),
+    ]);
+    return { docs, total };
+  }
+
+  async countsByStatus() {
+    const agg = await this.col
+      .aggregate<{ _id: GymStatus; count: number }>([
+        { $group: { _id: "$status", count: { $sum: 1 } } },
+      ])
+      .toArray();
+    const map: Record<string, number> = {};
+    for (const row of agg) map[row._id] = row.count;
+    return map;
   }
 }

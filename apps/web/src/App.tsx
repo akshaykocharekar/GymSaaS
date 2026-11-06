@@ -3,7 +3,6 @@ import Landing from "./pages/Landing.js";
 import Register from "./pages/Register.js";
 import Login from "./pages/Login.js";
 import Activate from "./pages/Activate.js";
-import AdminRegistrations from "./pages/AdminRegistrations.js";
 import Dashboard from "./pages/Dashboard.js";
 import Members from "./pages/Members.js";
 import MemberNew from "./pages/MemberNew.js";
@@ -13,9 +12,17 @@ import Payments from "./pages/Payments.js";
 import PaymentNew from "./pages/PaymentNew.js";
 import Expiries from "./pages/Expiries.js";
 import Reports from "./pages/Reports.js";
+import Billing from "./pages/Billing.js";
+import BillingSuccess from "./pages/BillingSuccess.js";
 import TrialExpired from "./pages/TrialExpired.js";
+import AdminRegistrations from "./pages/AdminRegistrations.js";
+import AdminDashboard from "./pages/admin/AdminDashboard.js";
+import AdminGyms from "./pages/admin/AdminGyms.js";
+import AdminGymDetail from "./pages/admin/AdminGymDetail.js";
+import AdminPayments from "./pages/admin/AdminPayments.js";
 import ProtectedRoute from "./components/ProtectedRoute.js";
 import AppLayout from "./layouts/AppLayout.js";
+import AdminLayout from "./layouts/AdminLayout.js";
 
 export default function App() {
   return (
@@ -27,14 +34,27 @@ export default function App() {
       <Route path="/trial-expired" element={<TrialExpired />} />
 
       <Route element={<ProtectedRoute roles={["SUPERADMIN"]} />}>
-        <Route path="/admin/registrations" element={<AdminRegistrations />} />
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/registrations" element={<AdminRegistrations />} />
+          <Route path="/admin/gyms" element={<AdminGyms />} />
+          <Route path="/admin/gyms/:id" element={<AdminGymDetail />} />
+          <Route path="/admin/payments" element={<AdminPayments />} />
+        </Route>
       </Route>
 
       <Route
         element={
           <ProtectedRoute
             roles={["OWNER", "STAFF"]}
-            blockStatuses={["TRIAL_EXPIRED", "SUSPENDED", "REJECTED", "CANCELLED"]}
+            blockStatuses={[
+              "PENDING_APPROVAL",
+              "APPROVED",
+              "TRIAL_EXPIRED",
+              "SUSPENDED",
+              "REJECTED",
+              "CANCELLED",
+            ]}
           />
         }
       >
@@ -48,6 +68,8 @@ export default function App() {
           <Route path="/app/payments/new" element={<PaymentNew />} />
           <Route path="/app/expiries" element={<Expiries />} />
           <Route path="/app/reports" element={<Reports />} />
+          <Route path="/app/billing" element={<Billing />} />
+          <Route path="/app/billing/success" element={<BillingSuccess />} />
         </Route>
       </Route>
 

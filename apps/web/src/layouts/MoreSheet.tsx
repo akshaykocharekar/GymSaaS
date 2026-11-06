@@ -10,6 +10,7 @@ interface Props {
 const items = [
   { to: "/app/plans", label: "Membership Plans" },
   { to: "/app/reports", label: "Reports" },
+  { to: "/app/billing", label: "Billing" },
   { to: "/app/staff", label: "Staff" },
   { to: "/app/profile", label: "Gym Profile" },
 ];
