@@ -17,14 +17,23 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
-export const staffPermissionsSchema = z.array(z.nativeEnum(PERMISSIONS)).default([]);
+export const permissionsArraySchema = z
+  .array(z.nativeEnum(PERMISSIONS))
+  .default([]);
 
 export const createStaffSchema = z.object({
   name: z.string().trim().min(2).max(80),
   email: emailSchema,
   password: passwordSchema,
-  permissions: staffPermissionsSchema,
+  permissions: permissionsArraySchema,
 });
 export type CreateStaffInput = z.infer<typeof createStaffSchema>;
+
+export const updateStaffPermissionsSchema = z.object({
+  permissions: permissionsArraySchema,
+});
+export type UpdateStaffPermissionsInput = z.infer<
+  typeof updateStaffPermissionsSchema
+>;
 
 export const roleSchema = z.nativeEnum(ROLES);

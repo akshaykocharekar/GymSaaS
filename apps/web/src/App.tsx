@@ -15,6 +15,8 @@ import Reports from "./pages/Reports.js";
 import Billing from "./pages/Billing.js";
 import BillingSuccess from "./pages/BillingSuccess.js";
 import TrialExpired from "./pages/TrialExpired.js";
+import Staff from "./pages/Staff.js";
+import Profile from "./pages/Profile.js";
 import AdminRegistrations from "./pages/AdminRegistrations.js";
 import AdminDashboard from "./pages/admin/AdminDashboard.js";
 import AdminGyms from "./pages/admin/AdminGyms.js";
@@ -70,6 +72,8 @@ export default function App() {
           <Route path="/app/reports" element={<Reports />} />
           <Route path="/app/billing" element={<Billing />} />
           <Route path="/app/billing/success" element={<BillingSuccess />} />
+          <Route path="/app/staff" element={<Staff />} />
+          <Route path="/app/profile" element={<Profile />} />
         </Route>
       </Route>
 

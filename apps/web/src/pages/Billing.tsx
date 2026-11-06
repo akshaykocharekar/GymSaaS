@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api.js";
 import { useGym } from "../context/GymContext.js";
 import Card from "../components/ui/Card.js";
-import Button from "../components/ui/Button.js";
 import Skeleton from "../components/ui/Skeleton.js";
 import BuyLicenceButton from "../components/BuyLicenceButton.js";
+import RenewMaintenanceButton from "../components/RenewMaintenanceButton.js";
 
 interface LicenceStatus {
   ok: boolean;
@@ -45,7 +45,7 @@ export default function Billing() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Billing</h1>
         <p className="text-xs text-slate-500 mt-0.5">
-          One-time licence. Optional maintenance.
+          One-time licence · Optional annual maintenance
         </p>
       </div>
 
@@ -130,7 +130,7 @@ export default function Billing() {
             <BuyLicenceButton />
           </div>
           <p className="text-xs text-slate-500 text-center mt-2">
-            Secure payment via Razorpay · Test card: 4100 2800 0000 1007
+            Secure payment via Razorpay
           </p>
         </Card>
       )}
@@ -149,16 +149,17 @@ export default function Billing() {
             to keep updates and support.
           </p>
           <div className="mt-4">
-            <Button
-              onClick={() => {
-                // Handled in 5c when maintenance flow is wired
-                alert("Maintenance renewal flow — coming in 5c");
-              }}
-              variant="secondary"
-              fullWidth
-            >
-              Renew maintenance — ₹499
-            </Button>
+            <RenewMaintenanceButton />
+          </div>
+        </Card>
+      )}
+
+      {isPaid && !status.canRenewMaintenance && status.maintenanceDaysLeft !== null && (
+        <Card className="p-5">
+          <div className="text-sm text-slate-600">
+            Maintenance is active for{" "}
+            <strong>{status.maintenanceDaysLeft} more days</strong>. You&apos;ll
+            be able to renew starting 30 days before expiry.
           </div>
         </Card>
       )}

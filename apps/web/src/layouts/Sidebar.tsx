@@ -9,6 +9,8 @@ const links = [
   { to: "/app/plans", label: "Plans" },
   { to: "/app/reports", label: "Reports" },
   { to: "/app/billing", label: "Billing" },
+  { to: "/app/staff", label: "Staff" },
+  { to: "/app/profile", label: "Gym Profile" },
 ];
 
 export default function Sidebar() {
@@ -23,7 +25,7 @@ export default function Sidebar() {
           {user?.email}
         </div>
       </div>
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {links.map((l) => (
           <NavLink
             key={l.to}

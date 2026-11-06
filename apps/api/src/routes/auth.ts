@@ -111,6 +111,7 @@ authRoutes.post("/login", async (c) => {
     sub: user._id!.toString(),
     role: user.role,
     gymId: user.gymId ? user.gymId.toString() : null,
+    permissions: user.permissions || [],
   };
 
   await users.touchLogin(user._id!);
@@ -125,12 +126,12 @@ authRoutes.post("/login", async (c) => {
       gymId: payload.gymId,
       name: user.name,
       email: user.email,
+      permissions: user.permissions || [],
     },
     gymStatus,
   });
 });
 
-// ─── Refresh access token ──────────────────────────────
 authRoutes.post("/refresh", async (c) => {
   const body = await c.req.json();
   const refreshToken = body?.refreshToken;
@@ -152,6 +153,7 @@ authRoutes.post("/refresh", async (c) => {
     sub: payload.sub,
     role: payload.role,
     gymId: payload.gymId,
+    permissions: user.permissions || [],
   });
   return c.json({ ok: true, accessToken: newAccess });
 });

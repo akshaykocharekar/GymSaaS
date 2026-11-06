@@ -15,7 +15,9 @@ import { reportsRoutes } from "./routes/reports.js";
 import { dashboardRoutes } from "./routes/dashboard.js";
 import { profileRoutes } from "./routes/profile.js";
 import { licenceRoutes } from "./routes/licence.js";
+import { staffRoutes } from "./routes/staff.js";
 import { webhookRoutes } from "./routes/webhook.js";
+import { startTrialCron } from "./lib/trialCron.js";
 
 const app = new Hono();
 
@@ -37,22 +39,24 @@ app.get("/health", async (c) => {
 app.route("/api/auth", authRoutes);
 app.route("/api/activation", activationRoutes);
 app.route("/api/admin", adminRoutes);
-app.route("/api/webhooks", webhookRoutes); // public — signature-verified
+app.route("/api/webhooks", webhookRoutes);
 
-// Gym-scoped: licence endpoints are NOT behind trial guard
+// Gym-scoped: not behind trial guard
 app.route("/api/gym/licence", licenceRoutes);
 app.route("/api/gym/profile", profileRoutes);
 
-// All other gym data: gated by trialGuard
+// Gym data routes: behind trial guard
 app.use("/api/gym/plans/*", trialGuard());
 app.use("/api/gym/members/*", trialGuard());
 app.use("/api/gym/payments/*", trialGuard());
 app.use("/api/gym/reports/*", trialGuard());
+app.use("/api/gym/staff/*", trialGuard());
 app.route("/api/gym/plans", planRoutes);
 app.route("/api/gym/members", memberRoutes);
 app.route("/api/gym/payments", paymentRoutes);
 app.route("/api/gym/reports", reportsRoutes);
 app.route("/api/gym/dashboard", dashboardRoutes);
+app.route("/api/gym/staff", staffRoutes);
 
 app.get("/", (c) => c.text("Gymora API"));
 
@@ -60,6 +64,7 @@ async function main() {
   console.log("→ Connecting to MongoDB…");
   await connect(env.MONGODB_URI, env.MONGODB_DB);
   console.log("✓ MongoDB connected");
+  startTrialCron();
   serve({ fetch: app.fetch, port: env.PORT }, (info) => {
     console.log(`✓ Gymora API listening on http://localhost:${info.port}`);
   });

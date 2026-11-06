@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import { env } from "../env.js";
-import type { Role } from "@gymora/shared";
+import type { Role, Permission } from "@gymora/shared";
 
 export interface AccessPayload {
-  sub: string;         // userId
+  sub: string;
   role: Role;
   gymId: string | null;
+  permissions?: Permission[];
 }
 
 export function signAccess(payload: AccessPayload): string {

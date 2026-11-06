@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { ObjectId } from "mongodb";
+import { z } from "zod";
 import { ROLES } from "@gymora/shared";
 import { getDb } from "@gymora/db";
 import { GymRepo } from "../repositories/gyms.js";
@@ -31,6 +31,39 @@ profileRoutes.get("/", async (c) => {
       address: gym.address,
       status: gym.status,
       trialExpiresAt: gym.trialExpiresAt,
+      licenceExpiresAt: gym.licenceExpiresAt,
     },
   });
+});
+
+const patchSchema = z.object({
+  name: z.string().trim().min(2).max(120).optional(),
+  ownerName: z.string().trim().min(2).max(80).optional(),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number")
+    .optional(),
+  address: z.string().trim().min(5).max(300).optional(),
+});
+
+profileRoutes.patch("/", async (c) => {
+  const auth = c.get("auth") as any;
+  if (auth.role !== ROLES.OWNER) {
+    throw new HTTPException(403, {
+      message: "Only owners can update the gym profile",
+    });
+  }
+
+  const body = await c.req.json();
+  const patch = patchSchema.parse(body);
+  if (Object.keys(patch).length === 0) {
+    throw new HTTPException(400, { message: "No fields to update" });
+  }
+
+  const gyms = new GymRepo(getDb());
+  const updated = await gyms.updateById(getGymId(c), patch as any);
+  if (!updated) throw new HTTPException(404, { message: "Gym not found" });
+
+  return c.json({ ok: true });
 });

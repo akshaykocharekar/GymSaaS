@@ -12,7 +12,6 @@ export default function AdminLayout() {
   const { logout, user } = useAuth();
   const { pathname } = useLocation();
 
-  // Build breadcrumbs from pathname
   const parts = pathname.split("/").filter(Boolean);
   const crumbs = parts.map((p, i) => ({
     label: p.charAt(0).toUpperCase() + p.slice(1).replace(/-/g, " "),
@@ -23,7 +22,7 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="flex">
-        {/* Sidebar */}
+        {/* ─── Desktop sidebar ─────────────────────────── */}
         <aside className="hidden lg:flex lg:flex-col w-56 bg-[#0a0a0b] min-h-screen sticky top-0">
           <div className="px-5 py-6 border-b border-white/5">
             <Link
@@ -70,11 +69,15 @@ export default function AdminLayout() {
         </aside>
 
         <div className="flex-1 min-w-0">
-          {/* Top bar */}
-          <header className="bg-white border-b border-slate-200 px-4 sm:px-6 h-12 flex items-center justify-between sticky top-0 z-20">
-            <div className="flex items-center gap-1.5 text-sm text-slate-500 truncate">
+          {/* ─── Top bar ──────────────────────────────────── */}
+          <header className="bg-white border-b border-slate-200 px-3 sm:px-6 h-12 flex items-center justify-between sticky top-0 z-20 gap-2">
+            {/* Breadcrumbs */}
+            <div className="flex items-center gap-1.5 text-sm text-slate-500 truncate min-w-0">
               {crumbs.map((c, i) => (
-                <span key={c.href} className="flex items-center gap-1.5">
+                <span
+                  key={c.href}
+                  className="flex items-center gap-1.5 min-w-0"
+                >
                   {i > 0 && <span className="text-slate-300">/</span>}
                   {c.isLast ? (
                     <span className="text-slate-900 font-medium truncate">
@@ -92,25 +95,33 @@ export default function AdminLayout() {
               ))}
             </div>
 
-            {/* Mobile nav dropdown */}
-            <nav className="lg:hidden flex gap-1">
-              {links.slice(0, 4).map((l) => (
-                <NavLink
-                  key={l.to}
-                  to={l.to}
-                  end={l.end}
-                  className={({ isActive }) =>
-                    `px-2 py-1 rounded text-xs font-medium ${
-                      isActive
-                        ? "bg-slate-900 text-white"
-                        : "text-slate-600 hover:bg-slate-100"
-                    }`
-                  }
-                >
-                  {l.label}
-                </NavLink>
-              ))}
-            </nav>
+            {/* Mobile nav + Logout */}
+            <div className="lg:hidden flex items-center gap-1 shrink-0">
+              <nav className="flex gap-0.5 overflow-x-auto max-w-[180px] scrollbar-hide">
+                {links.slice(0, 4).map((l) => (
+                  <NavLink
+                    key={l.to}
+                    to={l.to}
+                    end={l.end}
+                    className={({ isActive }) =>
+                      `px-1.5 py-1 rounded text-[11px] font-medium whitespace-nowrap ${
+                        isActive
+                          ? "bg-slate-900 text-white"
+                          : "text-slate-600 hover:bg-slate-100"
+                      }`
+                    }
+                  >
+                    {l.label}
+                  </NavLink>
+                ))}
+              </nav>
+              <button
+                onClick={logout}
+                className="ml-1 px-2 py-1 rounded text-[11px] font-medium text-slate-600 hover:bg-rose-50 hover:text-rose-600 whitespace-nowrap"
+              >
+                Logout
+              </button>
+            </div>
           </header>
 
           <main className="pb-12">

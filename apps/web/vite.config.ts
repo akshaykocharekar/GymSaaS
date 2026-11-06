@@ -5,6 +5,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
-    strictPort: true, // fail instead of auto-incrementing if 3000 is busy
+    strictPort: true,
+  },
+  build: {
+    outDir: "dist",
+    sourcemap: false,
   },
 });
