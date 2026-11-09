@@ -12,6 +12,9 @@ import Payments from "./pages/Payments.js";
 import PaymentNew from "./pages/PaymentNew.js";
 import Expiries from "./pages/Expiries.js";
 import Reports from "./pages/Reports.js";
+import Insights from "./pages/Insights.js";
+import Trainers from "./pages/Trainers.js";
+import TrainerDetail from "./pages/TrainerDetail.js";
 import Billing from "./pages/Billing.js";
 import BillingSuccess from "./pages/BillingSuccess.js";
 import TrialExpired from "./pages/TrialExpired.js";
@@ -70,6 +73,9 @@ export default function App() {
           <Route path="/app/payments/new" element={<PaymentNew />} />
           <Route path="/app/expiries" element={<Expiries />} />
           <Route path="/app/reports" element={<Reports />} />
+          <Route path="/app/insights" element={<Insights />} />
+          <Route path="/app/trainers" element={<Trainers />} />
+          <Route path="/app/trainers/:id" element={<TrainerDetail />} />
           <Route path="/app/billing" element={<Billing />} />
           <Route path="/app/billing/success" element={<BillingSuccess />} />
           <Route path="/app/staff" element={<Staff />} />

@@ -18,13 +18,91 @@ export const ROLES = {
 } as const;
 export type Role = (typeof ROLES)[keyof typeof ROLES];
 
+// ─── Staff permissions (v1: 10 fine-grained) ────────────
 export const PERMISSIONS = {
+  VIEW_MEMBERS: "VIEW_MEMBERS",
   MANAGE_MEMBERS: "MANAGE_MEMBERS",
+  VIEW_PAYMENTS: "VIEW_PAYMENTS",
   RECORD_PAYMENTS: "RECORD_PAYMENTS",
+  VIEW_EXPIRIES: "VIEW_EXPIRIES",
   VIEW_REPORTS: "VIEW_REPORTS",
+  VIEW_PLANS: "VIEW_PLANS",
+  MANAGE_PLANS: "MANAGE_PLANS",
+  VIEW_TRAINERS: "VIEW_TRAINERS",
+  MANAGE_TRAINERS: "MANAGE_TRAINERS",
 } as const;
 export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
+export const PERMISSION_IMPLIES: Record<Permission, Permission[]> = {
+  VIEW_MEMBERS: [],
+  MANAGE_MEMBERS: ["VIEW_MEMBERS"],
+  VIEW_PAYMENTS: [],
+  RECORD_PAYMENTS: ["VIEW_PAYMENTS"],
+  VIEW_EXPIRIES: ["VIEW_MEMBERS"],
+  VIEW_REPORTS: [],
+  VIEW_PLANS: [],
+  MANAGE_PLANS: ["VIEW_PLANS"],
+  VIEW_TRAINERS: ["VIEW_MEMBERS"],
+  MANAGE_TRAINERS: ["VIEW_TRAINERS"],
+};
+
+export const PERMISSION_META: Record<
+  Permission,
+  { label: string; description: string; group: string }
+> = {
+  VIEW_MEMBERS: {
+    label: "View members",
+    description: "See the member list and member details",
+    group: "Members",
+  },
+  MANAGE_MEMBERS: {
+    label: "Manage members",
+    description: "Add, edit, deactivate, and renew members",
+    group: "Members",
+  },
+  VIEW_PAYMENTS: {
+    label: "View payments",
+    description: "See payment history and dues",
+    group: "Payments",
+  },
+  RECORD_PAYMENTS: {
+    label: "Record payments",
+    description: "Log payments, advances, and renewals",
+    group: "Payments",
+  },
+  VIEW_EXPIRIES: {
+    label: "View expiries",
+    description: "See who's expiring soon and send WhatsApp reminders",
+    group: "Members",
+  },
+  VIEW_REPORTS: {
+    label: "View reports",
+    description: "See revenue, dues, plan mix, renewals",
+    group: "Reports",
+  },
+  VIEW_PLANS: {
+    label: "View plans",
+    description: "See membership plans",
+    group: "Plans",
+  },
+  MANAGE_PLANS: {
+    label: "Manage plans",
+    description: "Create, edit, and deactivate membership plans",
+    group: "Plans",
+  },
+  VIEW_TRAINERS: {
+    label: "View trainers",
+    description: "See trainers and their session sales",
+    group: "Trainers",
+  },
+  MANAGE_TRAINERS: {
+    label: "Manage trainers",
+    description: "Add/edit trainers, assign to members, sell session packs",
+    group: "Trainers",
+  },
+};
+
+// ─── Member statuses ────────────────────────────────────
 export const MEMBER_STATUS = {
   ACTIVE: "ACTIVE",
   EXPIRED: "EXPIRED",
@@ -48,6 +126,54 @@ export const PAYMENT_METHOD = {
 } as const;
 export type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
 
+// ─── Session pack types ─────────────────────────────────
+export const SESSION_PACK_TYPE = {
+  PT: "PT", // Personal training
+  YOGA: "YOGA",
+  ZUMBA: "ZUMBA",
+  CROSSFIT: "CROSSFIT",
+  OTHER: "OTHER",
+} as const;
+export type SessionPackType =
+  (typeof SESSION_PACK_TYPE)[keyof typeof SESSION_PACK_TYPE];
+
+export const SESSION_PACK_TYPE_META: Record<
+  SessionPackType,
+  { label: string }
+> = {
+  PT: { label: "Personal Training" },
+  YOGA: { label: "Yoga" },
+  ZUMBA: { label: "Zumba" },
+  CROSSFIT: { label: "CrossFit" },
+  OTHER: { label: "Other" },
+};
+
+export const COMPENSATION_TYPE = {
+  COMMISSION_ONLY: "COMMISSION_ONLY",
+  SALARY_ONLY: "SALARY_ONLY",
+  SALARY_PLUS_COMMISSION: "SALARY_PLUS_COMMISSION",
+} as const;
+export type CompensationType =
+  (typeof COMPENSATION_TYPE)[keyof typeof COMPENSATION_TYPE];
+
+export const COMPENSATION_TYPE_META: Record<
+  CompensationType,
+  { label: string; description: string }
+> = {
+  COMMISSION_ONLY: {
+    label: "Commission only",
+    description: "Paid a % of each PT/class pack they sell",
+  },
+  SALARY_ONLY: {
+    label: "Salary only",
+    description: "Fixed monthly salary, no commission on sales",
+  },
+  SALARY_PLUS_COMMISSION: {
+    label: "Salary + commission",
+    description: "Fixed monthly salary plus a % of pack sales",
+  },
+};
+
 export const LICENCE_PAYMENT_TYPE = {
   SOFTWARE_PURCHASE: "SOFTWARE_PURCHASE",
   MAINTENANCE: "MAINTENANCE",
@@ -67,28 +193,22 @@ export type LicencePaymentStatus =
 
 // ─── Business constants ─────────────────────────────────
 export const TRIAL_DAYS = 30;
-
-// First-year licence: ₹1,999 (no separate maintenance in year 1)
-export const LICENCE_PRICE_PAISE = 199_900; // ₹1,999
-
-// Maintenance from year 2 onwards: ₹499/year
-export const MAINTENANCE_PRICE_PAISE = 49_900; // ₹499
+export const LICENCE_PRICE_PAISE = 199_900;
+export const MAINTENANCE_PRICE_PAISE = 49_900;
 export const MAINTENANCE_DAYS = 365;
-
-// Maintenance becomes available for renewal 30 days before its expiry
 export const MAINTENANCE_RENEWAL_WINDOW_DAYS = 30;
 
 export const MAX_MEMBERS_PER_GYM = 500;
 export const MAX_MEMBERS_WARN_THRESHOLD = 450;
+export const MAX_STAFF_PER_GYM = 10;
+export const MAX_TRAINERS_PER_GYM = 20;
 
-// ─── Activation code ────────────────────────────────────
 export const ACTIVATION_CODE_PREFIX = "GYM";
 export const ACTIVATION_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const ACTIVATION_CODE_GROUPS = 2;
 export const ACTIVATION_CODE_GROUP_LEN = 4;
 export const ACTIVATION_CODE_TTL_HOURS = 72;
 
-// ─── WhatsApp ───────────────────────────────────────────
 export const WHATSAPP_VARIABLES = [
   "member_name",
   "gym_name",

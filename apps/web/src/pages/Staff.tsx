@@ -9,7 +9,8 @@ import Sheet from "../components/ui/Sheet.js";
 import FormField from "../components/FormField.js";
 import EmptyState from "../components/ui/EmptyState.js";
 import { useToast } from "../components/Toast.js";
-import { PERMISSIONS } from "@gymora/shared";
+import { PERMISSIONS, PERMISSION_META, MAX_STAFF_PER_GYM } from "@gymora/shared";
+import type { Permission } from "@gymora/shared";
 
 interface StaffMember {
   id: string;
@@ -21,20 +22,18 @@ interface StaffMember {
   createdAt: string;
 }
 
-const PERMISSION_LABELS: Record<string, { label: string; hint: string }> = {
-  MANAGE_MEMBERS: {
-    label: "Manage members",
-    hint: "Add, edit, and deactivate members",
-  },
-  RECORD_PAYMENTS: {
-    label: "Record payments",
-    hint: "Log payments and renewals",
-  },
-  VIEW_REPORTS: {
-    label: "View reports",
-    hint: "See revenue, dues, and distribution",
-  },
-};
+const PERMISSION_ORDER: Permission[] = [
+  "VIEW_MEMBERS",
+  "MANAGE_MEMBERS",
+  "VIEW_PAYMENTS",
+  "RECORD_PAYMENTS",
+  "VIEW_EXPIRIES",
+  "VIEW_REPORTS",
+  "VIEW_PLANS",
+  "MANAGE_PLANS",
+  "VIEW_TRAINERS",
+  "MANAGE_TRAINERS",
+];
 
 export default function Staff() {
   const toast = useToast();
@@ -53,7 +52,7 @@ export default function Staff() {
 
   const isOwner = user?.role === "OWNER";
   const activeCount = staff?.filter((s) => s.status === "ACTIVE").length ?? 0;
-  const atCapacity = activeCount >= 10;
+  const atCapacity = activeCount >= MAX_STAFF_PER_GYM;
 
   async function load() {
     setStaff(null);
@@ -139,6 +138,39 @@ export default function Staff() {
     );
   }
 
+  function renderPermissions(
+    selected: string[],
+    onToggle: (p: string) => void
+  ) {
+    return (
+      <div className="space-y-2">
+        {PERMISSION_ORDER.map((p) => {
+          const meta = PERMISSION_META[p];
+          const enabled = selected.includes(p);
+          return (
+            <label
+              key={p}
+              className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                checked={enabled}
+                onChange={() => onToggle(p)}
+                className="mt-0.5 rounded border-slate-300"
+              />
+              <div>
+                <div className="text-sm font-medium text-slate-900">
+                  {meta.label}
+                </div>
+                <div className="text-xs text-slate-500">{meta.description}</div>
+              </div>
+            </label>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -147,7 +179,8 @@ export default function Staff() {
             Staff
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            Up to 10 staff accounts
+            Up to {MAX_STAFF_PER_GYM} staff accounts · each with custom
+            permissions
           </p>
         </div>
         {staff !== null && (
@@ -155,7 +188,7 @@ export default function Staff() {
             onClick={() => {
               if (atCapacity) {
                 alert(
-                  "You already have an active staff account. Disable it first to add a new one."
+                  `You already have ${MAX_STAFF_PER_GYM} active staff accounts. Disable one to add a new one.`
                 );
                 return;
               }
@@ -177,8 +210,8 @@ export default function Staff() {
       ) : staff.length === 0 ? (
         <Card className="p-8 text-center space-y-3">
           <div className="text-sm text-slate-600 max-w-md mx-auto">
-            Add a staff member so your receptionist or manager can manage
-            members and record payments — with permissions you control.
+            Add a staff member so your receptionist or manager can help run the
+            gym — with permissions you control.
           </div>
           <Button onClick={() => setSheetOpen(true)}>Add staff account</Button>
         </Card>
@@ -208,47 +241,20 @@ export default function Staff() {
                 <div className="text-[11px] font-medium uppercase tracking-wider text-slate-500 mb-2">
                   Permissions
                 </div>
-                <div className="space-y-2">
-                  {Object.values(PERMISSIONS).map((p) => {
-                    const info = PERMISSION_LABELS[p];
-                    const enabled = s.permissions.includes(p);
-                    return (
-                      <label
-                        key={p}
-                        className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={enabled}
-                          onChange={() => {
-                            const next = enabled
-                              ? s.permissions.filter((x) => x !== p)
-                              : [...s.permissions, p];
-                            updatePermissions(s.id, next);
-                          }}
-                          className="mt-0.5 rounded border-slate-300"
-                        />
-                        <div>
-                          <div className="text-sm font-medium text-slate-900">
-                            {info.label}
-                          </div>
-                          <div className="text-xs text-slate-500">
-                            {info.hint}
-                          </div>
-                        </div>
-                      </label>
-                    );
-                  })}
-                </div>
+                {renderPermissions(s.permissions, (p) => {
+                  const next = s.permissions.includes(p)
+                    ? s.permissions.filter((x) => x !== p)
+                    : [...s.permissions, p];
+                  updatePermissions(s.id, next);
+                })}
               </div>
             </Card>
           ))}
-
           {atCapacity && (
             <Card className="p-4 bg-slate-50">
               <p className="text-xs text-slate-600">
-                You&apos;ve reached the staff limit (10 per gym). Disable the
-                current account to add a new one.
+                You&apos;ve reached the staff limit ({MAX_STAFF_PER_GYM} per
+                gym). Disable a current account to add a new one.
               </p>
             </Card>
           )}
@@ -291,30 +297,7 @@ export default function Staff() {
             <div className="text-sm font-medium text-slate-700 mb-2">
               Permissions
             </div>
-            <div className="space-y-1.5">
-              {Object.values(PERMISSIONS).map((p) => {
-                const info = PERMISSION_LABELS[p];
-                return (
-                  <label
-                    key={p}
-                    className="flex items-start gap-2.5 p-2 rounded-lg hover:bg-slate-50 cursor-pointer"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={form.permissions.includes(p)}
-                      onChange={() => togglePerm(p)}
-                      className="mt-0.5 rounded border-slate-300"
-                    />
-                    <div>
-                      <div className="text-sm font-medium text-slate-900">
-                        {info.label}
-                      </div>
-                      <div className="text-xs text-slate-500">{info.hint}</div>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
+            {renderPermissions(form.permissions, togglePerm)}
           </div>
 
           {error && <p className="text-sm text-rose-600">{error}</p>}

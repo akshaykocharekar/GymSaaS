@@ -1,6 +1,15 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 import { api } from "../lib/api.js";
 import { saveAuth, loadAuth, clearAuth, type AuthUser } from "../lib/auth.js";
+import { roleHasPermission } from "../lib/permissions.js";
+import type { Permission } from "@gymora/shared";
 
 interface LoginResponse {
   ok: boolean;
@@ -16,6 +25,7 @@ interface AuthContextValue {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  hasPermission: (p: Permission) => boolean;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -55,8 +65,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setGymStatus(null);
   }
 
+  const hasPermission = useCallback(
+    (p: Permission) =>
+      roleHasPermission(user?.role, user?.permissions, p),
+    [user]
+  );
+
   return (
-    <AuthContext.Provider value={{ user, gymStatus, loading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, gymStatus, loading, login, logout, hasPermission }}
+    >
       {children}
     </AuthContext.Provider>
   );

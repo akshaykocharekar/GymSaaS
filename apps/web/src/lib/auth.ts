@@ -4,6 +4,7 @@ export interface AuthUser {
   gymId: string | null;
   name: string;
   email: string;
+  permissions?: string[];
 }
 
 export interface StoredAuth {

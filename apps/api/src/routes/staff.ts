@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { ObjectId } from "mongodb";
-import { z } from "zod";
 import {
   ROLES,
+  MAX_STAFF_PER_GYM,
   createStaffSchema,
   updateStaffPermissionsSchema,
 } from "@gymora/shared";
@@ -11,8 +11,6 @@ import { UserRepo } from "../repositories/users.js";
 import { hashPassword } from "../lib/password.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
-
-const MAX_STAFF_PER_GYM = 10;
 
 export const staffRoutes = new Hono();
 
@@ -55,7 +53,6 @@ staffRoutes.post("/", async (c) => {
   const gymId = getGymId(c);
   const users = new UserRepo(db);
 
-  // Hard limit: 10 active staff per gym
   const activeCount = await db
     .collection("users")
     .countDocuments({ gymId, role: ROLES.STAFF, status: "ACTIVE" });
@@ -71,7 +68,6 @@ staffRoutes.post("/", async (c) => {
   }
 
   const passwordHash = await hashPassword(input.password);
-
   const res = await users.create({
     gymId,
     role: ROLES.STAFF,
@@ -92,10 +88,12 @@ staffRoutes.patch("/:id", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
 
-  const result = await db.collection("users").updateOne(
-    { _id: new ObjectId(c.req.param("id")), gymId, role: ROLES.STAFF },
-    { $set: { permissions: input.permissions, updatedAt: new Date() } }
-  );
+  const result = await db
+    .collection("users")
+    .updateOne(
+      { _id: new ObjectId(c.req.param("id")), gymId, role: ROLES.STAFF },
+      { $set: { permissions: input.permissions, updatedAt: new Date() } }
+    );
 
   if (result.matchedCount === 0) {
     throw new HTTPException(404, { message: "Staff not found" });
@@ -107,10 +105,12 @@ staffRoutes.delete("/:id", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
 
-  const result = await db.collection("users").updateOne(
-    { _id: new ObjectId(c.req.param("id")), gymId, role: ROLES.STAFF },
-    { $set: { status: "DISABLED", updatedAt: new Date() } }
-  );
+  const result = await db
+    .collection("users")
+    .updateOne(
+      { _id: new ObjectId(c.req.param("id")), gymId, role: ROLES.STAFF },
+      { $set: { status: "DISABLED", updatedAt: new Date() } }
+    );
 
   if (result.matchedCount === 0) {
     throw new HTTPException(404, { message: "Staff not found" });

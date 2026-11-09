@@ -11,6 +11,7 @@ import { useToast } from "../components/Toast.js";
 import PaymentSheet from "../components/PaymentSheet.js";
 import RenewSheet from "../components/RenewSheet.js";
 import WhatsAppSheet from "../components/WhatsAppSheet.js";
+import AddSessionPackSheet from "../components/AddSessionPackSheet.js";
 
 interface Member {
   id: string;
@@ -24,6 +25,7 @@ interface Member {
   expiryDate: string;
   isInactive: boolean;
   advanceBalance: number;
+  trainerId: string | null;
   status: "ACTIVE" | "EXPIRED" | "INACTIVE";
   notes: string | null;
 }
@@ -44,6 +46,19 @@ interface HistoryRow {
   amountPaid: number | null;
 }
 
+interface SessionPack {
+  id: string;
+  trainerId: string | null;
+  type: string;
+  typeLabel: string;
+  sessionsPurchased: number;
+  sessionsUsed: number;
+  remaining: number;
+  pricePaid: number;
+  purchasedAt: string;
+  expiresAt: string | null;
+}
+
 type Tab = "details" | "payments" | "history";
 
 export default function MemberDetail() {
@@ -51,12 +66,20 @@ export default function MemberDetail() {
   const nav = useNavigate();
   const toast = useToast();
   const { gym } = useGym();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission("MANAGE_MEMBERS");
+  const canRecord = hasPermission("RECORD_PAYMENTS");
+  const canSeeTrainers =
+    hasPermission("VIEW_TRAINERS") || hasPermission("MANAGE_TRAINERS");
+
   const [member, setMember] = useState<Member | null>(null);
+  const [packs, setPacks] = useState<SessionPack[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [tab, setTab] = useState<Tab>("details");
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [renewOpen, setRenewOpen] = useState(false);
   const [waOpen, setWaOpen] = useState(false);
+  const [packOpen, setPackOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const load = useCallback(() => {
@@ -66,9 +89,22 @@ export default function MemberDetail() {
       .catch(() => nav("/app/members", { replace: true }));
   }, [id, nav]);
 
+  const loadPacks = useCallback(() => {
+    if (!canSeeTrainers) return;
+    setPacks(null);
+    api
+      .get<{ packs: SessionPack[] }>(
+        `/api/gym/trainers/session-packs/member/${id}`,
+        true
+      )
+      .then((res) => setPacks(res.packs))
+      .catch(() => setPacks([]));
+  }, [id, canSeeTrainers]);
+
   useEffect(() => {
     load();
-  }, [load, refreshKey]);
+    loadPacks();
+  }, [load, loadPacks, refreshKey]);
 
   async function toggleInactive() {
     if (!member) return;
@@ -85,6 +121,28 @@ export default function MemberDetail() {
       toast.show(err instanceof ApiError ? err.message : "Failed", "error");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function logSessions(packId: string, max: number) {
+    if (max < 1) return;
+    const input = prompt(`How many sessions used? (1-${max})`, "1");
+    if (!input) return;
+    const count = parseInt(input, 10);
+    if (!count || count < 1 || count > max) {
+      toast.show(`Enter a number between 1 and ${max}`, "error");
+      return;
+    }
+    try {
+      const res = await api.post<{ remaining: number }>(
+        `/api/gym/trainers/session-packs/${packId}/log`,
+        { count },
+        true
+      );
+      toast.show(`Logged ${count} sessions · ${res.remaining} left`);
+      setRefreshKey((k) => k + 1);
+    } catch (err) {
+      toast.show(err instanceof ApiError ? err.message : "Failed", "error");
     }
   }
 
@@ -108,14 +166,7 @@ export default function MemberDetail() {
           onClick={() => nav(-1)}
           className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center"
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
@@ -157,19 +208,26 @@ export default function MemberDetail() {
               </svg>
             </button>
           </div>
-          <div className="flex gap-2 mt-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              fullWidth
-              onClick={() => setPaymentOpen(true)}
-            >
-              Record payment
-            </Button>
-            <Button size="sm" fullWidth onClick={() => setRenewOpen(true)}>
-              Renew
-            </Button>
-          </div>
+
+          {(canManage || canRecord) && (
+            <div className="flex gap-2 mt-4">
+              {canRecord && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  fullWidth
+                  onClick={() => setPaymentOpen(true)}
+                >
+                  Record payment
+                </Button>
+              )}
+              {canManage && (
+                <Button size="sm" fullWidth onClick={() => setRenewOpen(true)}>
+                  Renew
+                </Button>
+              )}
+            </div>
+          )}
         </Card>
 
         <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
@@ -206,9 +264,7 @@ export default function MemberDetail() {
                     ? `${daysLeft} day${daysLeft === 1 ? "" : "s"}`
                     : daysLeft === 0
                     ? "Today"
-                    : `${Math.abs(daysLeft)} day${
-                        Math.abs(daysLeft) === 1 ? "" : "s"
-                      } ago`
+                    : `${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? "" : "s"} ago`
                 }
               />
               {member.advanceBalance > 0 && (
@@ -223,15 +279,90 @@ export default function MemberDetail() {
               {member.notes && <Row label="Notes" value={member.notes} />}
             </Card>
 
-            <Button
-              variant={member.isInactive ? "secondary" : "danger"}
-              fullWidth
-              size="lg"
-              onClick={toggleInactive}
-              loading={busy}
-            >
-              {member.isInactive ? "Reactivate member" : "Mark inactive"}
-            </Button>
+            {/* Session packs */}
+            {canSeeTrainers && (
+              <Card className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
+                    Session packs
+                  </div>
+                  {canManage && (
+                    <button
+                      onClick={() => setPackOpen(true)}
+                      className="text-xs font-medium text-primary-600 hover:text-primary-700"
+                    >
+                      + Add pack
+                    </button>
+                  )}
+                </div>
+                {packs === null ? (
+                  <Skeleton className="h-12 w-full" />
+                ) : packs.length === 0 ? (
+                  <p className="text-sm text-slate-500">
+                    No session packs yet.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {packs.map((p) => {
+                      const isExpired = p.expiresAt && new Date(p.expiresAt) < new Date();
+                      return (
+                        <div
+                          key={p.id}
+                          className={`border rounded-lg p-3 flex items-center justify-between gap-3 ${
+                            isExpired
+                              ? "border-slate-100 bg-slate-50 opacity-60"
+                              : "border-slate-100"
+                          }`}
+                        >
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium text-slate-900">
+                              {p.typeLabel}
+                              {isExpired && (
+                                <span className="ml-1.5 text-[10px] text-rose-600 font-medium uppercase">
+                                  expired
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {p.sessionsUsed}/{p.sessionsPurchased} used ·{" "}
+                              <span
+                                className={
+                                  p.remaining > 0
+                                    ? "text-emerald-600 font-medium"
+                                    : "text-slate-400"
+                                }
+                              >
+                                {p.remaining} remaining
+                              </span>
+                            </div>
+                          </div>
+                          {canManage && p.remaining > 0 && !isExpired && (
+                            <button
+                              onClick={() => logSessions(p.id, p.remaining)}
+                              className="shrink-0 px-2.5 py-1 rounded bg-slate-900 text-white text-xs font-medium hover:bg-slate-800"
+                            >
+                              Log used
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </Card>
+            )}
+
+            {canManage && (
+              <Button
+                variant={member.isInactive ? "secondary" : "danger"}
+                fullWidth
+                size="lg"
+                onClick={toggleInactive}
+                loading={busy}
+              >
+                {member.isInactive ? "Reactivate member" : "Mark inactive"}
+              </Button>
+            )}
           </>
         )}
 
@@ -243,27 +374,39 @@ export default function MemberDetail() {
         )}
       </div>
 
-      <PaymentSheet
-        open={paymentOpen}
-        onClose={() => setPaymentOpen(false)}
-        memberId={member.id}
-        defaultAmount={0}
-        onSuccess={() => {
-          setRefreshKey((k) => k + 1);
-          if (tab !== "payments") setTab("payments");
-        }}
-      />
-      <RenewSheet
-        open={renewOpen}
-        onClose={() => setRenewOpen(false)}
-        memberId={member.id}
-        currentPlanId={member.planId}
-        currentAdvanceBalance={member.advanceBalance}
-        onSuccess={() => {
-          setRefreshKey((k) => k + 1);
-          load();
-        }}
-      />
+      {canRecord && (
+        <PaymentSheet
+          open={paymentOpen}
+          onClose={() => setPaymentOpen(false)}
+          memberId={member.id}
+          defaultAmount={0}
+          onSuccess={() => {
+            setRefreshKey((k) => k + 1);
+            if (tab !== "payments") setTab("payments");
+          }}
+        />
+      )}
+      {canManage && (
+        <RenewSheet
+          open={renewOpen}
+          onClose={() => setRenewOpen(false)}
+          memberId={member.id}
+          currentPlanId={member.planId}
+          currentAdvanceBalance={member.advanceBalance}
+          onSuccess={() => {
+            setRefreshKey((k) => k + 1);
+            load();
+          }}
+        />
+      )}
+      {canManage && canSeeTrainers && (
+        <AddSessionPackSheet
+          open={packOpen}
+          onClose={() => setPackOpen(false)}
+          memberId={member.id}
+          onSuccess={() => setRefreshKey((k) => k + 1)}
+        />
+      )}
       <WhatsAppSheet
         open={waOpen}
         onClose={() => setWaOpen(false)}
@@ -299,12 +442,22 @@ function PaymentsTab({ memberId }: { memberId: string }) {
     );
   return (
     <div className="space-y-2">
-      {payments.map((p) => (
+      {payments.map((p: any) => (
         <Card key={p.id} className="p-4 flex items-center justify-between">
           <div>
             <div className="text-sm font-medium text-slate-900">₹{p.amount}</div>
             <div className="text-xs text-slate-500">
-              {new Date(p.paymentDate).toLocaleDateString("en-IN")} · {p.method}
+              {new Date(p.paymentDate).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+              })}
+              {p.createdAt &&
+                ` · ${new Date(p.createdAt).toLocaleTimeString("en-IN", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                })}`}{" "}
+              · {p.method}
               {p.note ? ` · ${p.note}` : ""}
             </div>
           </div>

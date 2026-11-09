@@ -1,13 +1,13 @@
 import { Hono } from "hono";
 import { ObjectId } from "mongodb";
-import { ROLES } from "@gymora/shared";
+import { z } from "zod";
 import { getDb } from "@gymora/db";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import { requireAuth } from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
 
 export const dashboardRoutes = new Hono();
 
-dashboardRoutes.use("*", requireAuth, requireRole(ROLES.OWNER, ROLES.STAFF));
+dashboardRoutes.use("*", requireAuth);
 
 function getGymId(c: any): ObjectId {
   const auth = c.get("auth");
@@ -15,14 +15,37 @@ function getGymId(c: any): ObjectId {
   return new ObjectId(auth.gymId);
 }
 
+const querySchema = z.object({
+  range: z.enum(["1m", "3m", "6m", "12m"]).default("1m"),
+});
+
+function rangeToStart(range: string): Date {
+  const now = new Date();
+  switch (range) {
+    case "1m":
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    case "3m":
+      return new Date(now.getFullYear(), now.getMonth() - 2, 1);
+    case "6m":
+      return new Date(now.getFullYear(), now.getMonth() - 5, 1);
+    case "12m":
+      return new Date(now.getFullYear(), now.getMonth() - 11, 1);
+    default:
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+  }
+}
+
 dashboardRoutes.get("/", async (c) => {
+  const { range } = querySchema.parse(
+    Object.fromEntries(new URL(c.req.url).searchParams)
+  );
   const db = getDb();
   const gymId = getGymId(c);
   const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const rangeStart = rangeToStart(range);
   const sevenDaysOut = new Date(now.getTime() + 7 * 86_400_000);
 
-  const [total, active, expired, expiring, recentPayments, monthRevenue] =
+  const [total, active, expired, expiring, recentPayments, rangePayments] =
     await Promise.all([
       db.collection("members").countDocuments({ gymId }),
       db
@@ -31,30 +54,38 @@ dashboardRoutes.get("/", async (c) => {
       db
         .collection("members")
         .countDocuments({ gymId, isInactive: false, expiryDate: { $lt: now } }),
-      db
-        .collection("members")
-        .countDocuments({
-          gymId,
-          isInactive: false,
-          expiryDate: { $gte: now, $lte: sevenDaysOut },
-        }),
+      db.collection("members").countDocuments({
+        gymId,
+        isInactive: false,
+        expiryDate: { $gte: now, $lte: sevenDaysOut },
+      }),
       db
         .collection("payments")
         .find({ gymId })
-        .sort({ paymentDate: -1, createdAt: -1 })
+        .sort({ createdAt: -1 })
         .limit(5)
         .toArray(),
       db
         .collection("payments")
-        .aggregate<{ total: number }>([
-          { $match: { gymId, paymentDate: { $gte: monthStart } } },
-          { $group: { _id: null, total: { $sum: "$amount" } } },
-        ])
+        .find({ gymId, paymentDate: { $gte: rangeStart } })
         .toArray(),
     ]);
 
-  // Hydrate recent payment member names
-  const memberIds = [...new Set(recentPayments.map((p: any) => p.memberId.toString()))];
+  let membershipRevenue = 0;
+  let sessionRevenue = 0;
+  for (const p of rangePayments) {
+    const note = (p.note || "") as string;
+    if (note.startsWith("Session pack:")) {
+      sessionRevenue += p.amount as number;
+    } else {
+      membershipRevenue += p.amount as number;
+    }
+  }
+  const totalRevenue = membershipRevenue + sessionRevenue;
+
+  const memberIds = [
+    ...new Set(recentPayments.map((p: any) => p.memberId.toString())),
+  ];
   const memberMap = new Map<string, string>();
   await Promise.all(
     memberIds.map(async (id) => {
@@ -67,8 +98,13 @@ dashboardRoutes.get("/", async (c) => {
 
   return c.json({
     ok: true,
+    range,
     counts: { total, active, expired, expiring },
-    monthRevenue: monthRevenue[0]?.total ?? 0,
+    revenue: {
+      membership: membershipRevenue,
+      session: sessionRevenue,
+      total: totalRevenue,
+    },
     recentPayments: recentPayments.map((p: any) => ({
       id: p._id.toString(),
       memberId: p.memberId.toString(),
@@ -76,6 +112,7 @@ dashboardRoutes.get("/", async (c) => {
       amount: p.amount,
       method: p.method,
       paymentDate: p.paymentDate,
+      note: p.note,
     })),
   });
 });

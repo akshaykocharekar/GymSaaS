@@ -9,25 +9,32 @@ export const createMemberSchema = z.object({
   joiningDate: z.coerce.date(),
   planId: z.string().trim().min(1, "Plan is required"),
   membershipStartDate: z.coerce.date(),
+  trainerId: z.string().trim().optional().or(z.literal("")),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
+  // Initial payment
+  collectPayment: z.boolean().default(true),
+  initialPaymentAmount: z.number().int().nonnegative().optional(),
+  initialPaymentMethod: z.enum(["CASH", "UPI", "OTHER"]).default("CASH"),
 });
 export type CreateMemberInput = z.infer<typeof createMemberSchema>;
 
-export const updateMemberSchema = createMemberSchema.partial();
+export const updateMemberSchema = z.object({
+  fullName: z.string().trim().min(2).max(120).optional(),
+  phone: phoneSchema.optional(),
+  email: emailSchema.optional().or(z.literal("")),
+  address: z.string().trim().max(300).optional().or(z.literal("")),
+  joiningDate: z.coerce.date().optional(),
+  planId: z.string().trim().min(1).optional(),
+  membershipStartDate: z.coerce.date().optional(),
+  trainerId: z.string().trim().optional().or(z.literal("")),
+  notes: z.string().trim().max(500).optional().or(z.literal("")),
+});
 export type UpdateMemberInput = z.infer<typeof updateMemberSchema>;
 
 export const setInactiveSchema = z.object({
   isInactive: z.boolean(),
 });
 export type SetInactiveInput = z.infer<typeof setInactiveSchema>;
-
-export const renewMemberSchema = z.object({
-  planId: z.string().trim().min(1),
-  startDate: z.coerce.date(),
-  amountPaid: z.number().int().nonnegative().optional(),
-  paymentMethod: z.enum(["CASH", "UPI", "OTHER"]).optional(),
-});
-export type RenewMemberInput = z.infer<typeof renewMemberSchema>;
 
 export const memberListQuerySchema = z.object({
   q: z.string().trim().optional(),

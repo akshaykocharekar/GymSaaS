@@ -1,20 +1,37 @@
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.js";
+import type { Permission } from "@gymora/shared";
 
-const links = [
+interface LinkDef {
+  to: string;
+  label: string;
+  perm?: Permission;
+  ownerOnly?: boolean;
+}
+
+const links: LinkDef[] = [
   { to: "/app/dashboard", label: "Dashboard" },
-  { to: "/app/members", label: "Members" },
-  { to: "/app/payments", label: "Payments" },
-  { to: "/app/expiries", label: "Expiries" },
-  { to: "/app/plans", label: "Plans" },
-  { to: "/app/reports", label: "Reports" },
-  { to: "/app/billing", label: "Billing" },
-  { to: "/app/staff", label: "Staff" },
+  { to: "/app/members", label: "Members", perm: "VIEW_MEMBERS" },
+  { to: "/app/payments", label: "Payments", perm: "VIEW_PAYMENTS" },
+  { to: "/app/expiries", label: "Expiries", perm: "VIEW_EXPIRIES" },
+  { to: "/app/plans", label: "Plans", perm: "VIEW_PLANS" },
+  { to: "/app/trainers", label: "Trainers", perm: "VIEW_TRAINERS" },
+  { to: "/app/reports", label: "Reports", perm: "VIEW_REPORTS" },
+  { to: "/app/billing", label: "Billing", ownerOnly: true },
+  { to: "/app/staff", label: "Staff", ownerOnly: true },
   { to: "/app/profile", label: "Gym Profile" },
 ];
 
 export default function Sidebar() {
-  const { logout, user } = useAuth();
+  const { logout, user, hasPermission } = useAuth();
+  const isOwner = user?.role === "OWNER";
+
+  const visible = links.filter((l) => {
+    if (l.ownerOnly) return isOwner;
+    if (l.perm) return hasPermission(l.perm);
+    return true;
+  });
+
   return (
     <aside className="hidden lg:flex lg:flex-col w-64 border-r border-slate-200 bg-white min-h-screen sticky top-0">
       <div className="px-6 py-6 border-b border-slate-100">
@@ -24,9 +41,14 @@ export default function Sidebar() {
         <div className="text-xs text-slate-500 mt-1 truncate">
           {user?.email}
         </div>
+        {user?.role === "STAFF" && (
+          <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-1">
+            Staff
+          </div>
+        )}
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        {links.map((l) => (
+        {visible.map((l) => (
           <NavLink
             key={l.to}
             to={l.to}

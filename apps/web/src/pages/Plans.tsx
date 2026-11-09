@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../lib/api.js";
+import { useAuth } from "../context/AuthContext.js";
 import Card from "../components/ui/Card.js";
 import Button from "../components/ui/Button.js";
 import Sheet from "../components/ui/Sheet.js";
@@ -18,6 +19,9 @@ interface Plan {
 
 export default function Plans() {
   const toast = useToast();
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission("MANAGE_PLANS");
+
   const [plans, setPlans] = useState<Plan[] | null>(null);
   const [editing, setEditing] = useState<Plan | "new" | null>(null);
   const [form, setForm] = useState({ name: "", durationDays: "30", price: "1000" });
@@ -33,11 +37,13 @@ export default function Plans() {
   }, []);
 
   function openNew() {
+    if (!canManage) return;
     setForm({ name: "", durationDays: "30", price: "1000" });
     setEditing("new");
   }
 
   function openEdit(p: Plan) {
+    if (!canManage) return;
     setForm({
       name: p.name,
       durationDays: String(p.durationDays),
@@ -48,6 +54,7 @@ export default function Plans() {
 
   async function save(e: FormEvent) {
     e.preventDefault();
+    if (!canManage) return;
     setBusy(true);
     try {
       const payload = {
@@ -81,9 +88,11 @@ export default function Plans() {
             Membership durations and prices
           </p>
         </div>
-        <Button size="sm" onClick={openNew}>
-          + New plan
-        </Button>
+        {canManage && (
+          <Button size="sm" onClick={openNew}>
+            + New plan
+          </Button>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -92,9 +101,9 @@ export default function Plans() {
           : plans.map((p) => (
               <Card
                 key={p.id}
-                interactive
+                interactive={canManage}
                 className="p-4 flex items-center justify-between"
-                onClick={() => openEdit(p)}
+                onClick={canManage ? () => openEdit(p) : undefined}
               >
                 <div>
                   <div className="font-medium text-slate-900">{p.name}</div>
@@ -102,15 +111,17 @@ export default function Plans() {
                     {p.durationDays} days · ₹{p.price}
                   </div>
                 </div>
-                <svg
-                  className="w-5 h-5 text-slate-400"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
+                {canManage && (
+                  <svg
+                    className="w-5 h-5 text-slate-400"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M9 18l6-6-6-6" />
+                  </svg>
+                )}
               </Card>
             ))}
       </div>
@@ -133,7 +144,9 @@ export default function Plans() {
             name="durationDays"
             type="number"
             value={form.durationDays}
-            onChange={(e) => setForm((f) => ({ ...f, durationDays: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, durationDays: e.target.value }))
+            }
             required
           />
           <FormField

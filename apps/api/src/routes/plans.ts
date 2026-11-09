@@ -3,12 +3,15 @@ import { ObjectId } from "mongodb";
 import { createPlanSchema, updatePlanSchema, ROLES } from "@gymora/shared";
 import { getDb } from "@gymora/db";
 import { PlanRepo } from "../repositories/plans.js";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import {
+  requireAuth,
+  requireAnyPermission,
+} from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
 
 export const planRoutes = new Hono();
 
-planRoutes.use("*", requireAuth, requireRole(ROLES.OWNER, ROLES.STAFF));
+planRoutes.use("*", requireAuth);
 
 function getGymId(c: any): ObjectId {
   const auth = c.get("auth");
@@ -16,7 +19,8 @@ function getGymId(c: any): ObjectId {
   return new ObjectId(auth.gymId);
 }
 
-planRoutes.get("/", async (c) => {
+// GET: VIEW_PLANS (or MANAGE_PLANS implies VIEW_PLANS)
+planRoutes.get("/", requireAnyPermission("VIEW_PLANS", "MANAGE_PLANS"), async (c) => {
   const plans = new PlanRepo(getDb());
   const docs = await plans.listByGym(getGymId(c), true);
   return c.json({
@@ -32,7 +36,8 @@ planRoutes.get("/", async (c) => {
   });
 });
 
-planRoutes.post("/", async (c) => {
+// POST: MANAGE_PLANS
+planRoutes.post("/", requireAnyPermission("MANAGE_PLANS"), async (c) => {
   const body = await c.req.json();
   const input = createPlanSchema.parse(body);
   const plans = new PlanRepo(getDb());
@@ -40,7 +45,8 @@ planRoutes.post("/", async (c) => {
   return c.json({ ok: true, id: res.insertedId.toString() }, 201);
 });
 
-planRoutes.patch("/:id", async (c) => {
+// PATCH: MANAGE_PLANS
+planRoutes.patch("/:id", requireAnyPermission("MANAGE_PLANS"), async (c) => {
   const body = await c.req.json();
   const patch = updatePlanSchema.parse(body);
   const plans = new PlanRepo(getDb());
@@ -49,7 +55,8 @@ planRoutes.patch("/:id", async (c) => {
   return c.json({ ok: true });
 });
 
-planRoutes.delete("/:id", async (c) => {
+// DELETE: MANAGE_PLANS
+planRoutes.delete("/:id", requireAnyPermission("MANAGE_PLANS"), async (c) => {
   const plans = new PlanRepo(getDb());
   await plans.deactivateInGym(c.req.param("id"), getGymId(c));
   return c.json({ ok: true });

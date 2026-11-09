@@ -18,6 +18,8 @@ interface DuesMember {
 
 export default function Reports() {
   const [revenue, setRevenue] = useState<MonthRow[] | null>(null);
+  const [sessionRev, setSessionRev] = useState<MonthRow[] | null>(null);
+  const [payouts, setPayouts] = useState<MonthRow[] | null>(null);
   const [newRegs, setNewRegs] = useState<MonthRow[] | null>(null);
   const [renewals, setRenewals] = useState<MonthRow[] | null>(null);
   const [distribution, setDistribution] = useState<
@@ -30,18 +32,28 @@ export default function Reports() {
   useEffect(() => {
     Promise.all([
       api.get<{ months: MonthRow[] }>("/api/gym/reports/revenue", true),
+      api.get<{ months: MonthRow[] }>("/api/gym/reports/session-revenue", true),
+      api.get<{ months: MonthRow[] }>("/api/gym/reports/trainer-payouts", true),
       api.get<{ months: MonthRow[] }>("/api/gym/reports/new-registrations", true),
       api.get<{ months: MonthRow[] }>("/api/gym/reports/renewals", true),
       api.get<{ distribution: any[] }>("/api/gym/reports/distribution", true),
       api.get<{ count: number; members: DuesMember[] }>("/api/gym/reports/dues", true),
-    ]).then(([r, nr, rn, d, du]) => {
+    ]).then(([r, sr, p, nr, rn, d, du]) => {
       setRevenue(r.months);
+      setSessionRev(sr.months);
+      setPayouts(p.months);
       setNewRegs(nr.months);
       setRenewals(rn.months);
       setDistribution(d.distribution);
       setDues(du);
     });
   }, []);
+
+  const totalRevenue =
+    (revenue?.reduce((s, r) => s + (r.total || 0), 0) || 0) +
+    (sessionRev?.reduce((s, r) => s + (r.total || 0), 0) || 0);
+  const totalPayouts = payouts?.reduce((s, p) => s + (p.total || 0), 0) || 0;
+  const net = totalRevenue - totalPayouts;
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -50,9 +62,60 @@ export default function Reports() {
         <p className="text-xs text-slate-500 mt-0.5">Last 6 months</p>
       </div>
 
+      {/* Net summary */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Card className="p-4">
+          <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+            Total revenue
+          </div>
+          <div className="text-2xl font-bold text-slate-900 mt-1">
+            ₹{totalRevenue.toLocaleString("en-IN")}
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            membership + session packs
+          </div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+            Trainer payouts
+          </div>
+          <div className="text-2xl font-bold text-rose-600 mt-1">
+            ₹{totalPayouts.toLocaleString("en-IN")}
+          </div>
+          <div className="text-xs text-slate-500 mt-1">salary + commission</div>
+        </Card>
+        <Card className="p-4">
+          <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">
+            Net (before other costs)
+          </div>
+          <div
+            className={`text-2xl font-bold mt-1 ${
+              net >= 0 ? "text-emerald-600" : "text-rose-600"
+            }`}
+          >
+            ₹{net.toLocaleString("en-IN")}
+          </div>
+          <div className="text-xs text-slate-500 mt-1">
+            revenue − trainer payouts
+          </div>
+        </Card>
+      </div>
+
       <ReportCard
-        title="Revenue"
+        title="Membership revenue"
         data={revenue}
+        valueKey="total"
+        format={(v) => `₹${v.toLocaleString("en-IN")}`}
+      />
+      <ReportCard
+        title="Session pack revenue"
+        data={sessionRev}
+        valueKey="total"
+        format={(v) => `₹${v.toLocaleString("en-IN")}`}
+      />
+      <ReportCard
+        title="Trainer payouts"
+        data={payouts}
         valueKey="total"
         format={(v) => `₹${v.toLocaleString("en-IN")}`}
       />
@@ -152,7 +215,7 @@ function ReportCard({
                   style={{ width: `${Math.max(pct, 2)}%` }}
                 />
               </div>
-              <div className="w-16 text-right font-medium text-slate-900 shrink-0">
+              <div className="w-20 text-right font-medium text-slate-900 shrink-0">
                 {format ? format(v) : v}
               </div>
             </div>

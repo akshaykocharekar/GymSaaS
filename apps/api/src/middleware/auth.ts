@@ -1,7 +1,12 @@
 import type { Context, Next } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { verifyAccess, type AccessPayload } from "../lib/jwt.js";
-import { ROLES, type Role, type Permission } from "@gymora/shared";
+import {
+  ROLES,
+  type Role,
+  type Permission,
+} from "@gymora/shared";
+import { hasAnyPermission } from "../lib/permissions.js";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -37,30 +42,26 @@ export function requireRole(...allowed: Role[]) {
 }
 
 /**
- * Allows request if user is OWNER (has all permissions implicitly)
- * OR if their JWT includes the required permission.
+ * Allows request if OWNER or SUPERADMIN, or STAFF with any of the given perms.
+ * Use this instead of requirePermission for endpoints that can be reached by
+ * either of two equivalent permissions (e.g., MANAGE_MEMBERS implies VIEW_MEMBERS).
  */
-export function requirePermission(perm: Permission) {
+export function requireAnyPermission(...perms: Permission[]) {
   return async (c: Context, next: Next) => {
     const auth = c.get("auth");
-    if (!auth) {
-      throw new HTTPException(401, { message: "Not authenticated" });
-    }
-    if (auth.role === ROLES.OWNER) {
+    if (!auth) throw new HTTPException(401, { message: "Not authenticated" });
+
+    if (
+      auth.role === ROLES.OWNER ||
+      auth.role === ROLES.SUPERADMIN ||
+      hasAnyPermission(auth.role, auth.permissions, perms)
+    ) {
       await next();
       return;
     }
-    if (auth.role === ROLES.STAFF) {
-      const perms = auth.permissions || [];
-      if (perms.includes(perm)) {
-        await next();
-        return;
-      }
-      throw new HTTPException(403, {
-        message: `Missing permission: ${perm}`,
-      });
-    }
-    throw new HTTPException(403, { message: "Forbidden" });
+    throw new HTTPException(403, {
+      message: `Missing permission: ${perms.join(" or ")}`,
+    });
   };
 }
 

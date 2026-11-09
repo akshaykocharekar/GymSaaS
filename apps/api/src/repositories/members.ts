@@ -19,6 +19,7 @@ export interface MemberDoc {
   expiryDate: Date;
   isInactive: boolean;
   advanceBalance: number;
+  trainerId: ObjectId | null;
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -52,6 +53,7 @@ export class MemberRepo {
       expiryDate,
       isInactive: false,
       advanceBalance: 0,
+      trainerId: input.trainerId ? new ObjectId(input.trainerId) : null,
       notes: input.notes || null,
       createdAt: now,
       updatedAt: now,
@@ -79,7 +81,11 @@ export class MemberRepo {
     if (patch.notes !== undefined) set.notes = patch.notes || null;
     if (patch.expiryDate !== undefined) set.expiryDate = patch.expiryDate;
     if (patch.isInactive !== undefined) set.isInactive = patch.isInactive;
-    if (patch.advanceBalance !== undefined) set.advanceBalance = patch.advanceBalance;
+    if (patch.advanceBalance !== undefined)
+      set.advanceBalance = Math.max(0, patch.advanceBalance);
+    if (patch.trainerId !== undefined) {
+      set.trainerId = patch.trainerId ? new ObjectId(patch.trainerId) : null;
+    }
 
     const res = await this.col.findOneAndUpdate(
       { _id: new ObjectId(id), gymId },
@@ -89,17 +95,16 @@ export class MemberRepo {
     return res;
   }
 
-  /** Atomically increment/decrement advance balance. Returns updated doc. */
-  async adjustAdvanceBalance(id: string, gymId: ObjectId, delta: number) {
-    const res = await this.col.findOneAndUpdate(
-      { _id: new ObjectId(id), gymId },
+  async adjustAdvanceBalance(id: ObjectId, gymId: ObjectId, delta: number) {
+    if (delta === 0) return this.col.findOne({ _id: id, gymId });
+    return this.col.findOneAndUpdate(
+      { _id: id, gymId },
       {
         $inc: { advanceBalance: delta },
         $set: { updatedAt: new Date() },
       },
       { returnDocument: "after" }
     );
-    return res;
   }
 
   async list(gymId: ObjectId, query: MemberListQuery) {

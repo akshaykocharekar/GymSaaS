@@ -26,14 +26,19 @@ export class PaymentRepo {
 
   listByGym(
     gymId: ObjectId,
-    opts: { memberId?: ObjectId; method?: PaymentMethod; limit: number; offset: number }
+    opts: {
+      memberId?: ObjectId;
+      method?: PaymentMethod;
+      limit: number;
+      offset: number;
+    }
   ) {
     const filter: Record<string, unknown> = { gymId };
     if (opts.memberId) filter.memberId = opts.memberId;
     if (opts.method) filter.method = opts.method;
     return this.col
       .find(filter)
-      .sort({ paymentDate: -1, createdAt: -1 })
+      .sort({ createdAt: -1 })
       .skip(opts.offset)
       .limit(opts.limit)
       .toArray();
@@ -42,7 +47,7 @@ export class PaymentRepo {
   listByMemberInGym(memberId: ObjectId, gymId: ObjectId) {
     return this.col
       .find({ gymId, memberId })
-      .sort({ paymentDate: -1, createdAt: -1 })
+      .sort({ createdAt: -1 })
       .toArray();
   }
 

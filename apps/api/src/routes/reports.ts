@@ -1,13 +1,15 @@
 import { Hono } from "hono";
 import { ObjectId } from "mongodb";
-import { ROLES } from "@gymora/shared";
 import { getDb } from "@gymora/db";
-import { requireAuth, requireRole } from "../middleware/auth.js";
+import {
+  requireAuth,
+  requireAnyPermission,
+} from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
 
 export const reportsRoutes = new Hono();
 
-reportsRoutes.use("*", requireAuth, requireRole(ROLES.OWNER, ROLES.STAFF));
+reportsRoutes.use("*", requireAuth, requireAnyPermission("VIEW_REPORTS"));
 
 function getGymId(c: any): ObjectId {
   const auth = c.get("auth");
@@ -16,7 +18,13 @@ function getGymId(c: any): ObjectId {
 }
 
 function lastNMonths(n: number) {
-  const arr: { year: number; month: number; label: string; start: Date; end: Date }[] = [];
+  const arr: {
+    year: number;
+    month: number;
+    label: string;
+    start: Date;
+    end: Date;
+  }[] = [];
   const now = new Date();
   for (let i = n - 1; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -25,7 +33,10 @@ function lastNMonths(n: number) {
     arr.push({
       year: d.getFullYear(),
       month: d.getMonth() + 1,
-      label: start.toLocaleDateString("en-IN", { month: "short", year: "numeric" }),
+      label: start.toLocaleDateString("en-IN", {
+        month: "short",
+        year: "numeric",
+      }),
       start,
       end,
     });
@@ -33,12 +44,11 @@ function lastNMonths(n: number) {
   return arr;
 }
 
-// ─── Monthly revenue (last 6 months) ───────────────────
+// ─── Membership revenue (last 6 months) ────────────────
 reportsRoutes.get("/revenue", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
   const months = lastNMonths(6);
-
   const results = await Promise.all(
     months.map(async (m) => {
       const agg = await db
@@ -51,7 +61,73 @@ reportsRoutes.get("/revenue", async (c) => {
       return { label: m.label, total: agg[0]?.total ?? 0 };
     })
   );
+  return c.json({ ok: true, months: results });
+});
 
+// ─── Session pack revenue (last 6 months) ──────────────
+reportsRoutes.get("/session-revenue", async (c) => {
+  const db = getDb();
+  const gymId = getGymId(c);
+  const months = lastNMonths(6);
+
+  const results = await Promise.all(
+    months.map(async (m) => {
+      const agg = await db
+        .collection("session_packs")
+        .aggregate<{ total: number; count: number }>([
+          {
+            $match: {
+              gymId,
+              purchasedAt: { $gte: m.start, $lt: m.end },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$pricePaid" },
+              count: { $sum: 1 },
+            },
+          },
+        ])
+        .toArray();
+      return {
+        label: m.label,
+        total: agg[0]?.total ?? 0,
+        count: agg[0]?.count ?? 0,
+      };
+    })
+  );
+  return c.json({ ok: true, months: results });
+});
+
+// ─── Trainer payouts (last 6 months) ───────────────────
+reportsRoutes.get("/trainer-payouts", async (c) => {
+  const db = getDb();
+  const gymId = getGymId(c);
+  const months = lastNMonths(6);
+
+  const results = await Promise.all(
+    months.map(async (m) => {
+      const agg = await db
+        .collection("trainer_payouts")
+        .aggregate<{ total: number; count: number }>([
+          { $match: { gymId, paidOn: { $gte: m.start, $lt: m.end } } },
+          {
+            $group: {
+              _id: null,
+              total: { $sum: "$amount" },
+              count: { $sum: 1 },
+            },
+          },
+        ])
+        .toArray();
+      return {
+        label: m.label,
+        total: agg[0]?.total ?? 0,
+        count: agg[0]?.count ?? 0,
+      };
+    })
+  );
   return c.json({ ok: true, months: results });
 });
 
@@ -60,13 +136,11 @@ reportsRoutes.get("/dues", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
   const now = new Date();
-
   const expired = await db
     .collection("members")
     .find({ gymId, isInactive: false, expiryDate: { $lt: now } })
     .sort({ expiryDate: 1 })
     .toArray();
-
   return c.json({
     ok: true,
     count: expired.length,
@@ -83,12 +157,10 @@ reportsRoutes.get("/dues", async (c) => {
 reportsRoutes.get("/distribution", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
-
   const plans = await db
     .collection("membership_plans")
     .find({ gymId, isActive: true })
     .toArray();
-
   const results = await Promise.all(
     plans.map(async (p: any) => {
       const count = await db
@@ -97,7 +169,6 @@ reportsRoutes.get("/distribution", async (c) => {
       return { planName: p.name, count, price: p.price };
     })
   );
-
   return c.json({ ok: true, distribution: results });
 });
 
@@ -106,7 +177,6 @@ reportsRoutes.get("/new-registrations", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
   const months = lastNMonths(6);
-
   const results = await Promise.all(
     months.map(async (m) => {
       const count = await db
@@ -115,7 +185,6 @@ reportsRoutes.get("/new-registrations", async (c) => {
       return { label: m.label, count };
     })
   );
-
   return c.json({ ok: true, months: results });
 });
 
@@ -124,7 +193,6 @@ reportsRoutes.get("/renewals", async (c) => {
   const db = getDb();
   const gymId = getGymId(c);
   const months = lastNMonths(6);
-
   const results = await Promise.all(
     months.map(async (m) => {
       const count = await db
@@ -133,6 +201,5 @@ reportsRoutes.get("/renewals", async (c) => {
       return { label: m.label, count };
     })
   );
-
   return c.json({ ok: true, months: results });
 });

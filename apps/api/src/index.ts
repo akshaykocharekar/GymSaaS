@@ -16,6 +16,9 @@ import { dashboardRoutes } from "./routes/dashboard.js";
 import { profileRoutes } from "./routes/profile.js";
 import { licenceRoutes } from "./routes/licence.js";
 import { staffRoutes } from "./routes/staff.js";
+import { trainerRoutes } from "./routes/trainers.js";
+import { payoutRoutes } from "./routes/payouts.js";
+import { insightsRoutes } from "./routes/insights.js";
 import { webhookRoutes } from "./routes/webhook.js";
 import { startTrialCron } from "./lib/trialCron.js";
 
@@ -35,28 +38,29 @@ app.get("/health", async (c) => {
   });
 });
 
-// Public
 app.route("/api/auth", authRoutes);
 app.route("/api/activation", activationRoutes);
 app.route("/api/admin", adminRoutes);
 app.route("/api/webhooks", webhookRoutes);
-
-// Gym-scoped: not behind trial guard
 app.route("/api/gym/licence", licenceRoutes);
 app.route("/api/gym/profile", profileRoutes);
 
-// Gym data routes: behind trial guard
 app.use("/api/gym/plans/*", trialGuard());
 app.use("/api/gym/members/*", trialGuard());
 app.use("/api/gym/payments/*", trialGuard());
 app.use("/api/gym/reports/*", trialGuard());
 app.use("/api/gym/staff/*", trialGuard());
+app.use("/api/gym/trainers/*", trialGuard());
+app.use("/api/gym/payouts/*", trialGuard());
 app.route("/api/gym/plans", planRoutes);
 app.route("/api/gym/members", memberRoutes);
 app.route("/api/gym/payments", paymentRoutes);
 app.route("/api/gym/reports", reportsRoutes);
 app.route("/api/gym/dashboard", dashboardRoutes);
 app.route("/api/gym/staff", staffRoutes);
+app.route("/api/gym/trainers", trainerRoutes);
+app.route("/api/gym/payouts", payoutRoutes);
+app.route("/api/gym/insights", insightsRoutes);
 
 app.get("/", (c) => c.text("Gymora API"));
 

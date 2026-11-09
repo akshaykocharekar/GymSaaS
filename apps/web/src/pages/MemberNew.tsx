@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError } from "../lib/api.js";
 import FormField from "../components/FormField.js";
@@ -22,6 +22,7 @@ export default function MemberNew() {
   const [plans, setPlans] = useState<Plan[] | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const [form, setForm] = useState({
     fullName: "",
     phone: "",
@@ -31,18 +32,38 @@ export default function MemberNew() {
     planId: "",
     membershipStartDate: todayIso(),
     notes: "",
+    collectPayment: true,
+    initialPaymentAmount: "",
+    initialPaymentMethod: "CASH" as "CASH" | "UPI" | "OTHER",
   });
 
   useEffect(() => {
     api.get<{ plans: Plan[] }>("/api/gym/plans", true).then((res) => {
       setPlans(res.plans);
-      if (res.plans.length > 0) setForm((f) => ({ ...f, planId: res.plans[0].id }));
+      if (res.plans.length > 0) {
+        const first = res.plans[0];
+        setForm((f) => ({
+          ...f,
+          planId: first.id,
+          initialPaymentAmount: String(first.price),
+        }));
+      }
     });
   }, []);
 
   function update<K extends keyof typeof form>(k: K) {
-    return (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-      setForm((f) => ({ ...f, [k]: e.target.value }));
+    return (
+      e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  }
+
+  function updatePlan(planId: string) {
+    const plan = plans?.find((p) => p.id === planId);
+    setForm((f) => ({
+      ...f,
+      planId,
+      initialPaymentAmount: plan ? String(plan.price) : f.initialPaymentAmount,
+    }));
   }
 
   async function onSubmit(e: FormEvent) {
@@ -53,13 +74,26 @@ export default function MemberNew() {
       await api.post(
         "/api/gym/members",
         {
-          ...form,
+          fullName: form.fullName,
+          phone: form.phone,
+          email: form.email,
+          address: form.address,
           joiningDate: new Date(form.joiningDate).toISOString(),
+          planId: form.planId,
           membershipStartDate: new Date(form.membershipStartDate).toISOString(),
+          notes: form.notes,
+          collectPayment: form.collectPayment,
+          initialPaymentAmount:
+            form.collectPayment && form.initialPaymentAmount
+              ? Number(form.initialPaymentAmount)
+              : undefined,
+          initialPaymentMethod: form.initialPaymentMethod,
         },
         true
       );
-      toast.show("Member added");
+      toast.show(
+        form.collectPayment ? "Member added + payment recorded" : "Member added"
+      );
       nav("/app/members", { replace: true });
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Failed to add member");
@@ -67,6 +101,8 @@ export default function MemberNew() {
       setBusy(false);
     }
   }
+
+  const selectedPlan = plans?.find((p) => p.id === form.planId);
 
   return (
     <div className="max-w-2xl mx-auto pb-32">
@@ -92,7 +128,7 @@ export default function MemberNew() {
           <label className="block text-sm font-medium text-slate-700">Plan</label>
           <select
             value={form.planId}
-            onChange={update("planId")}
+            onChange={(e) => updatePlan(e.target.value)}
             required
             className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
@@ -111,6 +147,69 @@ export default function MemberNew() {
         <FormField label="Joining date" name="joiningDate" type="date" value={form.joiningDate} onChange={update("joiningDate")} required />
         <FormField label="Membership start" name="membershipStartDate" type="date" value={form.membershipStartDate} onChange={update("membershipStartDate")} required />
         <FormField label="Notes (optional)" name="notes" value={form.notes} onChange={update("notes")} />
+
+        {/* Payment section */}
+        <div className="pt-2 border-t border-slate-200">
+          <label className="flex items-start gap-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg cursor-pointer">
+            <input
+              type="checkbox"
+              checked={form.collectPayment}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, collectPayment: e.target.checked }))
+              }
+              className="mt-0.5 rounded border-slate-300"
+            />
+            <div>
+              <div className="text-sm font-medium text-emerald-900">
+                Collect payment now
+              </div>
+              <div className="text-xs text-emerald-700 mt-0.5">
+                Records{" "}
+                {selectedPlan
+                  ? `₹${selectedPlan.price}`
+                  : "the plan price"}{" "}
+                as a payment for this membership.
+              </div>
+            </div>
+          </label>
+
+          {form.collectPayment && (
+            <div className="mt-3 space-y-3">
+              <FormField
+                label="Amount collected (₹)"
+                name="initialPaymentAmount"
+                type="number"
+                value={form.initialPaymentAmount}
+                onChange={update("initialPaymentAmount")}
+                required
+              />
+
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-slate-700">
+                  Payment method
+                </label>
+                <div className="flex gap-2">
+                  {(["CASH", "UPI", "OTHER"] as const).map((m) => (
+                    <button
+                      type="button"
+                      key={m}
+                      onClick={() =>
+                        setForm((f) => ({ ...f, initialPaymentMethod: m }))
+                      }
+                      className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        form.initialPaymentMethod === m
+                          ? "bg-primary-600 text-white"
+                          : "bg-white text-slate-700 border border-slate-300"
+                      }`}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {error && <p className="text-sm text-danger">{error}</p>}
       </form>

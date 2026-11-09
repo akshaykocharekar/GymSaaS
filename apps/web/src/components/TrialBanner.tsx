@@ -8,11 +8,13 @@ export default function TrialBanner() {
 
   if (dismissed || !gym) return null;
 
+  // Only show for trial-related statuses
   const isTrial = gym.status === "ACTIVE_TRIAL";
   const isExpired = gym.status === "TRIAL_EXPIRED";
 
   if (!isTrial && !isExpired) return null;
 
+  // Compute days left
   let daysLeft: number | null = null;
   if (isTrial && gym.trialExpiresAt) {
     daysLeft = Math.ceil(
@@ -20,17 +22,26 @@ export default function TrialBanner() {
     );
   }
 
-  const tone = isExpired
+  // If daysLeft is 0 or negative, treat as expired (cron might not have flipped status yet)
+  const effectivelyExpired =
+    isExpired || (isTrial && daysLeft !== null && daysLeft <= 0);
+
+  const tone = effectivelyExpired
     ? "bg-red-50 border-red-200 text-red-900"
     : daysLeft !== null && daysLeft <= 5
     ? "bg-amber-50 border-amber-200 text-amber-900"
     : "bg-primary-50 border-primary-200 text-primary-900";
 
-  const message = isExpired
-    ? "Your trial has expired. Purchase a licence to unlock all features."
-    : daysLeft !== null && daysLeft > 0
-    ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left in your trial.`
-    : "Your trial ends today.";
+  let message: string;
+  if (effectivelyExpired) {
+    message = "Your trial has ended. Buy a licence to continue.";
+  } else if (daysLeft === 1) {
+    message = "1 day left in your trial.";
+  } else if (daysLeft !== null) {
+    message = `${daysLeft} days left in your trial.`;
+  } else {
+    message = "Trial active.";
+  }
 
   return (
     <div className={`border-b ${tone}`}>

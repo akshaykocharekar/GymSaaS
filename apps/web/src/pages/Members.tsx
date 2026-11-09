@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api.js";
+import { useAuth } from "../context/AuthContext.js";
 import Badge from "../components/ui/Badge.js";
 import Card from "../components/ui/Card.js";
 import EmptyState from "../components/ui/EmptyState.js";
@@ -26,6 +27,8 @@ const filters: { key: Filter; label: string }[] = [
 ];
 
 export default function Members() {
+  const { hasPermission } = useAuth();
+  const canManage = hasPermission("MANAGE_MEMBERS");
   const [members, setMembers] = useState<Member[] | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
@@ -100,7 +103,6 @@ export default function Members() {
           </>
         ) : members.length === 0 ? (
           <EmptyState
-         
             title="No members here"
             description={
               q ? "No matches for your search." : "Add your first member to get started."
@@ -137,7 +139,7 @@ export default function Members() {
         )}
       </div>
 
-      <FAB to="/app/members/new" label="Add member" />
+      {canManage && <FAB to="/app/members/new" label="Add member" />}
     </div>
   );
 }
