@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { CSSProperties, ReactNode, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
 /* ─── Icons (line-drawn, 1.5px stroke, no fills) ──────── */
@@ -59,11 +59,20 @@ function IconCheck() {
 }
 function IconArrow() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 transition-transform group-hover:transtone-x-0.5">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 transition-transform group-hover:translate-x-0.5">
       <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
   );
 }
+
+/* Shared faint grid used behind the hero and final CTA */
+const GRID_STYLE: CSSProperties = {
+  backgroundImage:
+    "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
+  backgroundSize: "44px 44px",
+  maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 100%)",
+  WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 100%)",
+};
 
 /* ─── Scroll reveal (respects reduced motion) ─────────── */
 function Reveal({
@@ -107,8 +116,24 @@ function Reveal({
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-700 ease-out ${
-        shown ? "opacity-100 translate-y-0" : "opacity-0 transtone-y-6"
+        shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* ─── Card with a soft glow that follows the cursor ───── */
+function Spot({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return (
+    <div
+      className={`gm-spot ${className}`}
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        e.currentTarget.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        e.currentTarget.style.setProperty("--my", `${e.clientY - r.top}px`);
+      }}
     >
       {children}
     </div>
@@ -141,28 +166,46 @@ function SectionHead({
   );
 }
 
+const marquee = [
+  "Members",
+  "Renewals",
+  "UPI payments",
+  "WhatsApp reminders",
+  "Expiry tracking",
+  "Reports",
+  "Staff access",
+];
+
 export default function Landing() {
   const [showBar, setShowBar] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const onScroll = () => setShowBar(window.scrollY > 520);
+    const onScroll = () => {
+      setShowBar(window.scrollY > 520);
+      const el = progressRef.current;
+      if (el) {
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        el.style.transform = `scaleX(${max > 0 ? Math.min(1, window.scrollY / max) : 0})`;
+      }
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const features = [
-    { icon: <IconUsers />, title: "Member management", desc: "Register, edit, and search every member in seconds." },
-    { icon: <IconCalendar />, title: "Expiry tracking", desc: "See who expires in 7, 15, and 30 days at a glance." },
-    { icon: <IconCard />, title: "Payment records", desc: "Record cash, UPI, and other payments. Track advances." },
-    { icon: <IconChart />, title: "Reports", desc: "Revenue, dues, plan mix, new joins, renewals." },
-    { icon: <IconMessage />, title: "WhatsApp reminders", desc: "One-tap personalised messages for expiries and dues." },
-    { icon: <IconPhone />, title: "Mobile-first", desc: "Designed for the gym floor, not a back office desk." },
+    { icon: <IconUsers />, title: "Member management", desc: "Register, edit, and search every member in seconds.", span: "sm:col-span-2 lg:col-span-2", wide: true },
+    { icon: <IconCalendar />, title: "Expiry tracking", desc: "See who expires in 7, 15, and 30 days at a glance.", span: "", wide: false },
+    { icon: <IconCard />, title: "Payment records", desc: "Record cash, UPI, and other payments. Track advances.", span: "", wide: false },
+    { icon: <IconChart />, title: "Reports", desc: "Revenue, dues, plan mix, new joins, renewals.", span: "sm:col-span-2 lg:col-span-2", wide: true },
+    { icon: <IconMessage />, title: "WhatsApp reminders", desc: "One-tap personalised messages for expiries and dues.", span: "", wide: false },
+    { icon: <IconPhone />, title: "Mobile-first", desc: "Designed for the gym floor, not a back office desk.", span: "lg:col-span-2", wide: true },
   ];
 
   const compare = [
     ["Pricing", "₹1,999 one-time", "₹999/month"],
-    ["Annual cost", "₹199", "₹11,988"],
+    ["Annual cost", "₹499", "₹11,988"],
     ["Per-member fees", "None", "Often"],
     ["Member limit", "500 (fair use)", "Capped by plan"],
     ["WhatsApp reminders", "Included", "Extra cost"],
@@ -173,13 +216,13 @@ export default function Landing() {
     { n: "01", title: "Register", desc: "Tell us about your gym." },
     { n: "02", title: "Get approved", desc: "Receive an activation code by email." },
     { n: "03", title: "Start trial", desc: "30 days free. Add members, plans, payments." },
-    { n: "04", title: "Pay once", desc: "₹1,999 to own it. ₹199/year to maintain." },
+    { n: "04", title: "Go live", desc: "₹1,999 licence, then ₹499/year maintenance." },
   ];
 
   const faqs = [
     {
-      q: "Is it really a one-time payment?",
-      a: "Yes. ₹1,999 once to use Palastra for as long as your gym is running. The ₹199/year maintenance is optional but covers hosting, security updates, and support.",
+      q: "Is it a one-time payment?",
+      a: "The ₹1,999 licence is a one-time payment. There is also a mandatory maintenance fee of ₹499/year, which covers hosting, security updates, and support and keeps your account active. There are no monthly or per-member fees.",
     },
     {
       q: "Are there per-member charges?",
@@ -205,16 +248,44 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-[#0c0a09] text-stone-200 antialiased selection:bg-orange-400/30 overflow-x-clip scroll-smooth">
-      {/* local keyframes — no Tailwind config changes needed */}
       <style>{`
         details > summary::-webkit-details-marker { display: none; }
+
+        @keyframes gm-marquee { to { transform: translateX(-50%); } }
+        .gm-marquee { animation: gm-marquee 34s linear infinite; }
+
+        @keyframes gm-drift { from { transform: translate3d(0,0,0); } to { transform: translate3d(48px,34px,0); } }
+        .gm-aurora { animation: gm-drift 9s ease-in-out infinite alternate; }
+        .gm-aurora-2 { animation: gm-drift 12s ease-in-out infinite alternate-reverse; }
+
+        @keyframes gm-shine { from { background-position: 0% center; } to { background-position: 200% center; } }
+        .gm-shine { background-size: 200% auto; animation: gm-shine 7s linear infinite; }
+
+        .gm-spot { position: relative; }
+        .gm-spot::before {
+          content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+          background: radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%), rgba(249,115,22,0.16), transparent 45%);
+          opacity: 0; transition: opacity .3s;
+        }
+        .gm-spot:hover::before { opacity: 1; }
+
+        @media (prefers-reduced-motion: reduce) {
+          .gm-marquee, .gm-aurora, .gm-aurora-2, .gm-shine { animation: none; }
+        }
       `}</style>
+
+      {/* Scroll progress */}
+      <div
+        ref={progressRef}
+        aria-hidden="true"
+        className="fixed left-0 top-0 z-[60] h-0.5 w-full origin-left scale-x-0 bg-gradient-to-r from-orange-500 via-amber-300 to-orange-400"
+      />
 
       {/* ─── Nav ──────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/5 bg-[#0c0a09]/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 sm:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-white">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-orange-400 text-orange-950 text-sm font-bold">
+            <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-orange-300 to-orange-500 text-orange-950 text-sm font-bold shadow-md shadow-orange-500/30">
               G
             </span>
             Palastra
@@ -242,24 +313,30 @@ export default function Landing() {
 
       {/* ─── Hero ─────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden">
-        {/* background: grid + glows */}
+        {/* background: grid + rings + drifting glows */}
+        <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-[0.35]" style={GRID_STYLE} />
         <div
-          className="absolute inset-0 -z-10 opacity-[0.35]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-            maskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 100%)",
-            WebkitMaskImage: "radial-gradient(ellipse 70% 60% at 50% 30%, #000 40%, transparent 100%)",
-          }}
-        />
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 [mask-image:radial-gradient(ellipse_60%_50%_at_50%_35%,#000,transparent)]"
+        >
+          {[420, 680, 940].map((s) => (
+            <div
+              key={s}
+              className="absolute left-1/2 top-[35%] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.06]"
+              style={{ width: s, height: s }}
+            />
+          ))}
+        </div>
         <div
-          className="absolute -top-40 left-1/2 -z-10 h-[520px] w-[820px] -transtone-x-1/2 blur-3xl"
+          aria-hidden="true"
+          className="absolute -top-40 left-1/2 -z-10 h-[520px] w-[820px] -translate-x-1/2 blur-3xl"
           style={{
             background:
-              "radial-gradient(closest-side, rgba(249,115,22,0.28), rgba(249,115,22,0.06) 60%, transparent)",
+              "radial-gradient(closest-side, rgba(249,115,22,0.30), rgba(249,115,22,0.06) 60%, transparent)",
           }}
         />
+        <div aria-hidden="true" className="gm-aurora absolute -left-24 top-24 -z-10 h-72 w-72 rounded-full bg-orange-500/20 blur-3xl" />
+        <div aria-hidden="true" className="gm-aurora-2 absolute -right-24 top-48 -z-10 h-80 w-80 rounded-full bg-amber-400/10 blur-3xl" />
 
         <div className="max-w-6xl mx-auto px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 flex flex-col items-center text-center">
           <div className="flex flex-col items-center">
@@ -275,9 +352,10 @@ export default function Landing() {
               Every renewal on time.
               <br />
               <span
-                className="bg-clip-text text-transparent"
+                className="gm-shine bg-clip-text text-transparent"
                 style={{
-                  backgroundImage: "linear-gradient(90deg, #fdba74 0%, #fb923c 45%, #fcd34d 100%)",
+                  backgroundImage:
+                    "linear-gradient(90deg, #fdba74 0%, #fb923c 25%, #fcd34d 50%, #fb923c 75%, #fdba74 100%)",
                 }}
               >
                 Every rupee tracked.
@@ -293,7 +371,7 @@ export default function Landing() {
             <div className="mt-9 flex flex-col sm:flex-row gap-3 sm:items-center justify-center w-full sm:w-auto">
               <Link
                 to="/register"
-                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-orange-400 px-6 py-3.5 text-[15px] font-semibold text-orange-950 shadow-lg shadow-orange-500/25 transition hover:bg-orange-300 active:scale-[0.98]"
+                className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-b from-orange-300 to-orange-500 px-7 py-3.5 text-[15px] font-semibold text-orange-950 shadow-lg shadow-orange-500/30 ring-1 ring-white/20 transition hover:brightness-110 active:scale-[0.98]"
               >
                 Start 30-day free trial
                 <IconArrow />
@@ -309,12 +387,12 @@ export default function Landing() {
             <div className="mt-12 grid grid-cols-3 gap-3 w-full max-w-lg">
               {[
                 ["₹1,999", "one-time"],
-                ["₹199", "/year maintenance"],
+                ["₹499", "/year maintenance"],
                 ["No", "monthly fees"],
               ].map(([big, small]) => (
                 <div
                   key={big}
-                  className="rounded-2xl border border-white/10 bg-white/[0.03] px-3.5 py-3 backdrop-blur"
+                  className="rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] px-3.5 py-3 backdrop-blur"
                 >
                   <div className="text-lg sm:text-xl font-semibold text-white">{big}</div>
                   <div className="text-[11px] sm:text-xs text-stone-500 leading-tight mt-0.5">{small}</div>
@@ -322,9 +400,23 @@ export default function Landing() {
               ))}
             </div>
           </div>
-
         </div>
       </section>
+
+      {/* ─── Marquee ──────────────────────────────────── */}
+      <div
+        aria-hidden="true"
+        className="relative overflow-hidden border-y border-white/5 bg-white/[0.015] py-4 [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]"
+      >
+        <div className="gm-marquee flex w-max items-center gap-10 text-xs font-medium uppercase tracking-[0.2em] text-stone-500 sm:text-sm">
+          {[...marquee, ...marquee].map((w, i) => (
+            <span key={i} className="flex items-center gap-10 whitespace-nowrap">
+              {w}
+              <span className="h-1 w-1 rounded-full bg-orange-400/70" />
+            </span>
+          ))}
+        </div>
+      </div>
 
       {/* ─── Features ─────────────────────────────────── */}
       <section id="features" className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28 scroll-mt-16">
@@ -337,18 +429,22 @@ export default function Landing() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f, i) => (
-            <Reveal key={f.title} delay={(i % 3) * 80}>
-              <div className="group relative h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition duration-300 hover:-transtone-y-1 hover:border-orange-400/40 hover:bg-white/[0.05]">
-                <div
-                  className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100"
-                  style={{ background: "rgba(249,115,22,0.25)" }}
-                />
-                <div className="relative grid h-11 w-11 place-items-center rounded-xl bg-orange-400/10 text-orange-300 ring-1 ring-orange-400/20">
+            <Reveal key={f.title} delay={(i % 3) * 80} className={`h-full ${f.span}`}>
+              <Spot className="group h-full overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-6 transition duration-300 hover:-translate-y-1 hover:border-orange-400/40 hover:bg-white/[0.05] sm:p-7">
+                {f.wide && (
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute -bottom-8 -right-6 text-orange-400/[0.08] [&>svg]:h-44 [&>svg]:w-44 [&>svg]:stroke-[0.75]"
+                  >
+                    {f.icon}
+                  </div>
+                )}
+                <div className="relative grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-orange-400/25 to-amber-300/5 text-orange-300 shadow-lg shadow-orange-500/10 ring-1 ring-orange-400/25">
                   {f.icon}
                 </div>
-                <div className="relative mt-5 font-semibold text-white">{f.title}</div>
-                <div className="relative mt-1.5 text-sm text-stone-400 leading-relaxed">{f.desc}</div>
-              </div>
+                <div className="relative mt-5 text-lg font-semibold text-white">{f.title}</div>
+                <div className="relative mt-1.5 max-w-sm text-sm text-stone-400 leading-relaxed">{f.desc}</div>
+              </Spot>
             </Reveal>
           ))}
         </div>
@@ -365,7 +461,7 @@ export default function Landing() {
           </Reveal>
 
           <Reveal>
-            <div className="max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-[#14110f]">
+            <div className="max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-[#14110f] shadow-[0_30px_80px_-40px_rgba(249,115,22,0.35)]">
               <table className="w-full text-[13px] sm:text-sm">
                 <thead>
                   <tr className="border-b border-white/10 bg-white/[0.03]">
@@ -378,7 +474,7 @@ export default function Landing() {
                   {compare.map(([label, us, them]) => (
                     <tr key={label} className="border-b border-white/5 last:border-0">
                       <td className="px-3 sm:px-5 py-3.5 text-stone-400">{label}</td>
-                      <td className="px-3 sm:px-5 py-3.5 text-white font-medium bg-orange-400/[0.04]">
+                      <td className="px-3 sm:px-5 py-3.5 text-white font-medium bg-orange-400/[0.06]">
                         <span className="inline-flex items-center gap-1.5">
                           <span className="text-orange-400 hidden sm:inline">
                             <IconCheck />
@@ -400,13 +496,17 @@ export default function Landing() {
       <section id="pricing" className="relative max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28 scroll-mt-16">
         <Reveal>
           <SectionHead eyebrow="Pricing" title="Honest pricing. No surprises.">
-            Pay once to own the software. Small yearly fee to keep it running.
+            A one-time licence fee, plus a small mandatory yearly maintenance
+            fee. No monthly charges and no per-member fees.
           </SectionHead>
         </Reveal>
 
         <div className="grid md:grid-cols-2 gap-5 max-w-3xl">
           <Reveal>
-            <div className="relative h-full rounded-3xl p-px" style={{ background: "linear-gradient(160deg, rgba(251,146,60,0.9), rgba(251,146,60,0.08) 45%, rgba(252,211,77,0.5))" }}>
+            <div
+              className="relative h-full rounded-3xl p-px shadow-[0_30px_90px_-30px_rgba(249,115,22,0.55)]"
+              style={{ background: "linear-gradient(160deg, rgba(251,146,60,0.9), rgba(251,146,60,0.08) 45%, rgba(252,211,77,0.5))" }}
+            >
               <div className="h-full rounded-[calc(1.5rem-1px)] bg-[#120f0d] p-7">
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium text-stone-400">Software licence</div>
@@ -435,7 +535,7 @@ export default function Landing() {
                 </ul>
                 <Link
                   to="/register"
-                  className="mt-8 block text-center rounded-full bg-orange-400 px-5 py-3 font-semibold text-orange-950 transition hover:bg-orange-300 active:scale-[0.98]"
+                  className="mt-8 block text-center rounded-full bg-gradient-to-b from-orange-300 to-orange-500 px-5 py-3 font-semibold text-orange-950 ring-1 ring-white/20 transition hover:brightness-110 active:scale-[0.98]"
                 >
                   Start free trial
                 </Link>
@@ -447,12 +547,12 @@ export default function Landing() {
             <div className="h-full rounded-3xl border border-white/10 bg-white/[0.03] p-7">
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-stone-400">Annual maintenance</div>
-                <span className="rounded-full bg-white/5 px-2.5 py-1 text-[11px] font-medium text-stone-400 ring-1 ring-white/10">
-                  Optional
+                <span className="rounded-full bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 ring-1 ring-amber-400/25">
+                  Mandatory
                 </span>
               </div>
               <div className="mt-4 flex items-baseline gap-1.5">
-                <span className="text-5xl font-semibold tracking-tight text-white">₹199</span>
+                <span className="text-5xl font-semibold tracking-tight text-white">₹499</span>
                 <span className="text-stone-500 text-sm">/year</span>
               </div>
               <ul className="mt-7 space-y-3.5 text-sm">
@@ -460,7 +560,7 @@ export default function Landing() {
                   "Hosting and infrastructure",
                   "Security updates",
                   "Bug fixes and support",
-                  "Optional, but recommended",
+                  "Required to keep your account active",
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5 text-stone-300">
                     <span className="text-orange-400 mt-0.5 shrink-0">
@@ -476,6 +576,21 @@ export default function Landing() {
             </div>
           </Reveal>
         </div>
+
+        <Reveal delay={150}>
+          <div className="mt-6 grid max-w-3xl grid-cols-3 divide-x divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+            {[
+              ["₹1,999", "one-time licence"],
+              ["₹499", "per year, mandatory"],
+              ["₹0", "monthly or per-member"],
+            ].map(([big, small]) => (
+              <div key={big} className="px-3 py-4 text-center sm:px-5">
+                <div className="text-xl font-semibold text-white sm:text-2xl">{big}</div>
+                <div className="mt-0.5 text-[11px] leading-tight text-stone-500 sm:text-xs">{small}</div>
+              </div>
+            ))}
+          </div>
+        </Reveal>
       </section>
 
       {/* ─── How it works ─────────────────────────────── */}
@@ -486,6 +601,10 @@ export default function Landing() {
           </Reveal>
 
           <div className="relative grid gap-5 sm:grid-cols-2 lg:grid-cols-4 max-w-5xl">
+            <div
+              aria-hidden="true"
+              className="absolute left-8 right-8 top-[2.6rem] hidden h-px bg-gradient-to-r from-transparent via-orange-400/40 to-transparent lg:block"
+            />
             {steps.map((s, i) => (
               <Reveal key={s.n} delay={i * 90}>
                 <div className="relative h-full rounded-2xl border border-white/10 bg-[#14110f] p-6">
@@ -532,11 +651,14 @@ export default function Landing() {
       <section className="px-5 sm:px-8 pb-20 sm:pb-28">
         <Reveal>
           <div className="relative isolate mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#120f0d] px-6 py-14 sm:px-14 sm:py-20 text-center sm:text-left">
+            <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-30" style={GRID_STYLE} />
             <div
+              aria-hidden="true"
               className="absolute -right-24 -top-24 -z-10 h-80 w-80 rounded-full blur-3xl"
-              style={{ background: "rgba(249,115,22,0.3)" }}
+              style={{ background: "rgba(249,115,22,0.35)" }}
             />
             <div
+              aria-hidden="true"
               className="absolute -bottom-32 -left-16 -z-10 h-72 w-72 rounded-full blur-3xl"
               style={{ background: "rgba(252,211,77,0.12)" }}
             />
@@ -548,7 +670,7 @@ export default function Landing() {
             </p>
             <Link
               to="/register"
-              className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-stone-900 transition hover:bg-orange-300 active:scale-[0.98]"
+              className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-stone-900 shadow-lg shadow-black/30 transition hover:bg-orange-300 active:scale-[0.98]"
             >
               Register your gym
               <IconArrow />
@@ -607,7 +729,7 @@ export default function Landing() {
         <div className="border-t border-white/10 bg-[#0c0a09]/85 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
           <Link
             to="/register"
-            className="flex items-center justify-center gap-2 rounded-full bg-orange-400 py-3.5 text-[15px] font-semibold text-orange-950 shadow-lg shadow-orange-500/20 active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 rounded-full bg-gradient-to-b from-orange-300 to-orange-500 py-3.5 text-[15px] font-semibold text-orange-950 shadow-lg shadow-orange-500/20 ring-1 ring-white/20 active:scale-[0.98]"
           >
             Start 30-day free trial
           </Link>

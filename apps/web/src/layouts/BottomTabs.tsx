@@ -14,16 +14,16 @@ interface Props {
 
 export default function BottomTabs({ onMoreClick }: Props) {
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-slate-200 lg:hidden">
+    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-white/10 bg-[#0c0a09]/85 backdrop-blur-xl lg:hidden">
       <div className="grid grid-cols-5 pb-[env(safe-area-inset-bottom)]">
         {tabs.map((t) =>
           t.to === "#more" ? (
             <button
               key={t.label}
               onClick={onMoreClick}
-              className="flex flex-col items-center justify-center py-2 min-h-[56px] text-slate-500 hover:text-slate-900"
+              className="group flex flex-col items-center justify-center py-2 min-h-[56px] text-stone-500 transition-colors hover:text-stone-200 active:text-orange-300"
             >
-              <t.icon className="w-5 h-5" />
+              <t.icon className="w-5 h-5 transition-transform group-active:scale-90" />
               <span className="text-[10px] mt-0.5 font-medium">{t.label}</span>
             </button>
           ) : (
@@ -31,13 +31,28 @@ export default function BottomTabs({ onMoreClick }: Props) {
               key={t.to}
               to={t.to}
               className={({ isActive }) =>
-                `flex flex-col items-center justify-center py-2 min-h-[56px] transition-colors ${
-                  isActive ? "text-primary-600" : "text-slate-500 hover:text-slate-900"
+                `group relative flex flex-col items-center justify-center py-2 min-h-[56px] transition-colors ${
+                  isActive ? "text-orange-300" : "text-stone-500 hover:text-stone-200"
                 }`
               }
             >
-              <t.icon className="w-5 h-5" />
-              <span className="text-[10px] mt-0.5 font-medium">{t.label}</span>
+              {({ isActive }) => (
+                <>
+                  {/* active marker: glowing bar on the top edge */}
+                  <span
+                    aria-hidden="true"
+                    className={`absolute top-0 h-0.5 rounded-full bg-orange-400 shadow-[0_0_12px_2px_rgba(249,115,22,0.7)] transition-all duration-300 ${
+                      isActive ? "w-8 opacity-100" : "w-0 opacity-0"
+                    }`}
+                  />
+                  <t.icon
+                    className={`w-5 h-5 transition-transform duration-200 group-active:scale-90 ${
+                      isActive ? "-translate-y-0.5" : ""
+                    }`}
+                  />
+                  <span className="text-[10px] mt-0.5 font-medium">{t.label}</span>
+                </>
+              )}
             </NavLink>
           )
         )}
