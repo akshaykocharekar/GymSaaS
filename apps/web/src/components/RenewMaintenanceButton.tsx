@@ -44,7 +44,7 @@ export default function RenewMaintenanceButton({
           key: order.keyId,
           amount: order.amount,
           currency: order.currency,
-          name: "Gymora",
+          name: "Palastra",
           description: "Annual maintenance — ₹499",
           order_id: order.orderId,
           prefill: {

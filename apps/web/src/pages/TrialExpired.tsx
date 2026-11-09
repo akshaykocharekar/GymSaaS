@@ -32,7 +32,7 @@ export default function TrialExpired() {
         </svg>
       );
       title = "Trial ended";
-      message = `${gymName}'s trial has expired. Purchase a licence to keep using Gymora. Your data is safe.`;
+      message = `${gymName}'s trial has expired. Purchase a licence to keep using Palastra. Your data is safe.`;
       showBuyButton = true;
       break;
 
@@ -52,7 +52,7 @@ export default function TrialExpired() {
         </svg>
       );
       title = "Account suspended";
-      message = `${gymName}'s account has been suspended. Contact support at hello@gymora.app to resolve this.`;
+      message = `${gymName}'s account has been suspended. Contact support at palastrasupport@gmail.com to resolve this.`;
       break;
 
     case "REJECTED":
@@ -71,7 +71,7 @@ export default function TrialExpired() {
         </svg>
       );
       title = "Registration not approved";
-      message = `${gymName}'s registration was not approved. Contact support at hello@gymora.app for details.`;
+      message = `${gymName}'s registration was not approved. Contact support at palastrasupport@gmail.com for details.`;
       break;
 
     case "CANCELLED":
@@ -90,7 +90,7 @@ export default function TrialExpired() {
         </svg>
       );
       title = "Account cancelled";
-      message = `${gymName}'s account has been cancelled. Contact support at hello@gymora.app if this was in error.`;
+      message = `${gymName}'s account has been cancelled. Contact support at palastrasupport@gmail.com if this was in error.`;
       break;
 
     default:
@@ -109,7 +109,7 @@ export default function TrialExpired() {
         </svg>
       );
       title = "Access restricted";
-      message = "Contact support at hello@gymora.app for assistance.";
+      message = "Contact support at palastrasupport@gmail.com for assistance.";
   }
 
   return (
@@ -143,7 +143,7 @@ export default function TrialExpired() {
           {status === "SUSPENDED" && (
             <div className="pt-2">
               <a
-                href="mailto:hello@gymora.app"
+                href="mailto:palastrasupport@gmail.com"
                 className="inline-block px-5 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-md hover:bg-slate-800"
               >
                 Email support

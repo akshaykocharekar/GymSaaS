@@ -43,7 +43,7 @@ export async function purchaseLicence(): Promise<VerifyResponse> {
       key: order.keyId,
       amount: order.amount,
       currency: order.currency,
-      name: "Gymora",
+      name: "Palastra",
       description: "Software licence — ₹1,999 (one-time)",
       order_id: order.orderId,
       prefill: {

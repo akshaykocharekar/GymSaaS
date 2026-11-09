@@ -42,7 +42,7 @@ export default function BillingSuccess() {
           Payment successful
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Thank you — your Gymora licence is now active.
+          Thank you — your Palastra licence is now active.
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export default function BillingSuccess() {
 
         <p className="text-xs text-slate-500">
           A copy of this receipt will be emailed to you shortly. For any
-          questions, contact hello@gymora.app.
+          questions, contact palastrasupport@gmail.com.
         </p>
 
         <div className="pt-2">

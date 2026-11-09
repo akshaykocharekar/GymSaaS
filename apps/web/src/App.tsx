@@ -1,5 +1,11 @@
 import { Route, Routes, Navigate } from "react-router-dom";
 import Landing from "./pages/Landing.js";
+import Terms from "./pages/legal/Terms.js";
+import Privacy from "./pages/legal/Privacy.js";
+import Refund from "./pages/legal/Refund.js";
+import Contact from "./pages/legal/Contact.js";
+import About from "./pages/legal/About.js";
+import Shipping from "./pages/legal/Shipping.js";
 import Register from "./pages/Register.js";
 import Login from "./pages/Login.js";
 import Activate from "./pages/Activate.js";
@@ -33,6 +39,12 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
+      <Route path="/legal/terms" element={<Terms />} />
+      <Route path="/legal/privacy" element={<Privacy />} />
+      <Route path="/legal/refund" element={<Refund />} />
+      <Route path="/legal/contact" element={<Contact />} />
+      <Route path="/legal/about" element={<About />} />
+      <Route path="/legal/shipping" element={<Shipping />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
       <Route path="/activate" element={<Activate />} />

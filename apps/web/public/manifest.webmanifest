@@ -1,7 +1,7 @@
 {
   "id": "/app/dashboard",
-  "name": "Gymora: Gym Management",
-  "short_name": "Gymora",
+  "name": "Palastra: Gym Management",
+  "short_name": "Palastra",
   "description": "Manage members, payments, and renewals for your gym.",
   "lang": "en",
   "dir": "ltr",

@@ -62,7 +62,7 @@ app.route("/api/gym/trainers", trainerRoutes);
 app.route("/api/gym/payouts", payoutRoutes);
 app.route("/api/gym/insights", insightsRoutes);
 
-app.get("/", (c) => c.text("Gymora API"));
+app.get("/", (c) => c.text("Palastra API"));
 
 async function main() {
   console.log("→ Connecting to MongoDB…");
@@ -70,7 +70,7 @@ async function main() {
   console.log("✓ MongoDB connected");
   startTrialCron();
   serve({ fetch: app.fetch, port: env.PORT }, (info) => {
-    console.log(`✓ Gymora API listening on http://localhost:${info.port}`);
+    console.log(`✓ Palastra API listening on http://localhost:${info.port}`);
   });
 }
 main().catch((e) => {

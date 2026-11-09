@@ -61,7 +61,7 @@ function Shell({ children }: { children: ReactNode }) {
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-orange-400 text-sm font-bold text-orange-950">
             G
           </span>
-          Gymora
+          Palastra
         </Link>
         <div className="flex flex-1 items-start sm:items-center">{children}</div>
       </div>
@@ -106,7 +106,7 @@ export default function Login() {
             Log in
           </div>
           <h1 className="text-3xl font-semibold tracking-tight text-white">Welcome back</h1>
-          <p className="mt-2 text-sm text-stone-400">Log in to Gymora</p>
+          <p className="mt-2 text-sm text-stone-400">Log in to Palastra</p>
         </div>
 
         <form onSubmit={onSubmit} className="space-y-4">

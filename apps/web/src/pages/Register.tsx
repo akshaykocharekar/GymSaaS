@@ -60,7 +60,7 @@ function Shell({ children }: { children: ReactNode }) {
           <span className="grid h-7 w-7 place-items-center rounded-lg bg-orange-400 text-sm font-bold text-orange-950">
             G
           </span>
-          Gymora
+          Palastra
         </Link>
         <div className="flex flex-1 items-start sm:items-center">{children}</div>
       </div>

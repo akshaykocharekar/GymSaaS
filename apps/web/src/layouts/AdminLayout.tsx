@@ -32,7 +32,7 @@ export default function AdminLayout() {
               <span className="grid h-7 w-7 place-items-center rounded-lg bg-orange-400 text-sm font-bold text-orange-950">
                 G
               </span>
-              Gymora
+              Palastra
             </Link>
             <div className="mt-2 inline-flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.18em] text-orange-400">
               <span className="h-px w-4 bg-orange-400/60" />

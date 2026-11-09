@@ -1,4 +1,4 @@
-# Gymora
+# Palastra
 
 Multi-tenant gym management SaaS. Mobile-first. One-time licence + annual maintenance.
 

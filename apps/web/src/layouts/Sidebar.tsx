@@ -36,7 +36,7 @@ export default function Sidebar() {
     <aside className="hidden lg:flex lg:flex-col w-64 border-r border-slate-200 bg-white min-h-screen sticky top-0">
       <div className="px-6 py-6 border-b border-slate-100">
         <div className="text-xl font-bold text-primary-600 tracking-tight">
-          Gymora
+          Palastra
         </div>
         <div className="text-xs text-slate-500 mt-1 truncate">
           {user?.email}

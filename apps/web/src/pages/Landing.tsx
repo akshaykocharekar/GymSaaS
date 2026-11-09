@@ -107,7 +107,7 @@ function Reveal({
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-700 ease-out ${
-        shown ? "opacity-100 transtone-y-0" : "opacity-0 transtone-y-6"
+        shown ? "opacity-100 translate-y-0" : "opacity-0 transtone-y-6"
       } ${className}`}
     >
       {children}
@@ -179,7 +179,7 @@ export default function Landing() {
   const faqs = [
     {
       q: "Is it really a one-time payment?",
-      a: "Yes. ₹1,999 once to use Gymora for as long as your gym is running. The ₹199/year maintenance is optional but covers hosting, security updates, and support.",
+      a: "Yes. ₹1,999 once to use Palastra for as long as your gym is running. The ₹199/year maintenance is optional but covers hosting, security updates, and support.",
     },
     {
       q: "Are there per-member charges?",
@@ -187,11 +187,11 @@ export default function Landing() {
     },
     {
       q: "How does the free trial work?",
-      a: "After we approve your gym, you get a 30-day trial. After 30 days, purchase the licence to keep using Gymora. Your data stays safe either way.",
+      a: "After we approve your gym, you get a 30-day trial. After 30 days, purchase the licence to keep using Palastra. Your data stays safe either way.",
     },
     {
-      q: "Can I collect member payments through Gymora?",
-      a: "Gymora records member payments manually — cash, UPI, or other. It doesn't process payments from your members. You keep collecting the same way you always have.",
+      q: "Can I collect member payments through Palastra?",
+      a: "Palastra records member payments manually — cash, UPI, or other. It doesn't process payments from your members. You keep collecting the same way you always have.",
     },
     {
       q: "How do WhatsApp reminders work?",
@@ -217,7 +217,7 @@ export default function Landing() {
             <span className="grid h-7 w-7 place-items-center rounded-lg bg-orange-400 text-orange-950 text-sm font-bold">
               G
             </span>
-            Gymora
+            Palastra
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm text-stone-400">
@@ -358,8 +358,8 @@ export default function Landing() {
       <section className="border-y border-white/5 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
           <Reveal>
-            <SectionHead eyebrow="Why Gymora" title="Built for gyms, not enterprises.">
-              Most gym software is priced like enterprise HR software. Gymora
+            <SectionHead eyebrow="Why Palastra" title="Built for gyms, not enterprises.">
+              Most gym software is priced like enterprise HR software. Palastra
               isn&apos;t.
             </SectionHead>
           </Reveal>
@@ -370,7 +370,7 @@ export default function Landing() {
                 <thead>
                   <tr className="border-b border-white/10 bg-white/[0.03]">
                     <th className="text-left px-3 sm:px-5 py-3.5 font-medium text-stone-500">&nbsp;</th>
-                    <th className="text-left px-3 sm:px-5 py-3.5 font-semibold text-orange-300">Gymora</th>
+                    <th className="text-left px-3 sm:px-5 py-3.5 font-semibold text-orange-300">Palastra</th>
                     <th className="text-left px-3 sm:px-5 py-3.5 font-medium text-stone-500">Typical SaaS</th>
                   </tr>
                 </thead>
@@ -559,26 +559,41 @@ export default function Landing() {
 
       {/* ─── Footer ───────────────────────────────────── */}
       <footer className="border-t border-white/5 pb-20 md:pb-0">
-        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row justify-between gap-6 text-sm text-stone-500">
-          <div>
-            <div className="font-semibold text-white mb-1">Gymora</div>
+        <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row justify-between gap-8 text-sm text-stone-500">
+          <div className="max-w-xs">
+            <div className="font-semibold text-white mb-1">Palastra</div>
             <div>Built for independent gyms in India.</div>
+            <div className="mt-3 text-xs text-stone-600">
+              Operated by Akshay Kocharekar
+            </div>
           </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <a href="mailto:hello@gymora.app" className="hover:text-white transition-colors">
-              hello@gymora.app
-            </a>
-            <Link to="/login" className="hover:text-white transition-colors">
-              Log in
-            </Link>
-            <Link to="/register" className="hover:text-white transition-colors">
-              Get started
-            </Link>
+          <div className="flex flex-col gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-wider text-stone-600 mb-2">Legal</div>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                <Link to="/legal/about" className="hover:text-white transition-colors">About</Link>
+                <Link to="/legal/terms" className="hover:text-white transition-colors">Terms</Link>
+                <Link to="/legal/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                <Link to="/legal/refund" className="hover:text-white transition-colors">Refunds</Link>
+                <Link to="/legal/shipping" className="hover:text-white transition-colors">Shipping</Link>
+                <Link to="/legal/contact" className="hover:text-white transition-colors">Contact</Link>
+              </div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wider text-stone-600 mb-2">More</div>
+              <div className="flex flex-wrap gap-x-5 gap-y-2">
+                <a href="mailto:palastrasupport@gmail.com" className="hover:text-white transition-colors">
+                  palastrasupport@gmail.com
+                </a>
+                <Link to="/login" className="hover:text-white transition-colors">Log in</Link>
+                <Link to="/register" className="hover:text-white transition-colors">Get started</Link>
+              </div>
+            </div>
           </div>
         </div>
         <div className="border-t border-white/5">
           <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 text-xs text-stone-600">
-            © {new Date().getFullYear()} Gymora. All rights reserved.
+            © {new Date().getFullYear()} Palastra. All rights reserved.
           </div>
         </div>
       </footer>
@@ -586,7 +601,7 @@ export default function Landing() {
       {/* ─── Sticky mobile CTA ────────────────────────── */}
       <div
         className={`fixed inset-x-0 bottom-0 z-50 md:hidden transition-transform duration-300 ${
-          showBar ? "transtone-y-0" : "transtone-y-full"
+          showBar ? "translate-y-0" : "translate-y-full"
         }`}
       >
         <div className="border-t border-white/10 bg-[#0c0a09]/85 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl">
