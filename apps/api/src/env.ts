@@ -18,6 +18,12 @@ const envSchema = z.object({
   RAZORPAY_KEY_ID: z.string().min(1),
   RAZORPAY_KEY_SECRET: z.string().min(1),
   RAZORPAY_WEBHOOK_SECRET: z.string().min(1),
+  // Brevo — email sending (optional in dev, required in prod)
+  BREVO_API_KEY: z.string().optional(),
+  EMAIL_FROM: z.string().email().default("palastrasupport@gmail.com"),
+  EMAIL_FROM_NAME: z.string().default("Palastra"),
+  // Web app URL — used for links inside emails
+  WEB_APP_URL: z.string().default("http://localhost:3000"),
 });
 
 const parsed = envSchema.safeParse(process.env);

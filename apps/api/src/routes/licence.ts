@@ -19,6 +19,11 @@ import {
   fetchRazorpayPayment,
 } from "../lib/razorpay.js";
 import { env } from "../env.js";
+import { sendEmail } from "../lib/email.js";
+import {
+  purchaseReceiptEmailHtml,
+  purchaseReceiptEmailText,
+} from "../templates/purchase-receipt.js";
 import { HTTPException } from "hono/http-exception";
 
 export const licenceRoutes = new Hono();
@@ -35,6 +40,7 @@ function daysBetween(a: Date, b: Date) {
   return Math.round((b.getTime() - a.getTime()) / 86_400_000);
 }
 
+// ─── Purchase licence ──────────────────────────────────
 licenceRoutes.post("/purchase", async (c) => {
   const gymId = getGymId(c);
   const db = getDb();
@@ -77,6 +83,7 @@ licenceRoutes.post("/purchase", async (c) => {
   });
 });
 
+// ─── Verify payment ────────────────────────────────────
 const verifySchema = z.object({
   razorpay_order_id: z.string().min(1),
   razorpay_payment_id: z.string().min(1),
@@ -98,6 +105,10 @@ licenceRoutes.post("/verify", async (c) => {
   if (order.status === LICENCE_PAYMENT_STATUS.PAID) {
     return c.json({ ok: true, message: "Already verified" });
   }
+
+  // Load gym once — used by BOTH branches + receipt email
+  const gym = await db.collection("gyms").findOne({ _id: gymId });
+  if (!gym) throw new HTTPException(404, { message: "Gym not found" });
 
   const valid = verifyPaymentSignature({
     orderId: input.razorpay_order_id,
@@ -126,6 +137,7 @@ licenceRoutes.post("/verify", async (c) => {
 
   const now = new Date();
 
+  // ─── Software purchase branch ────────────────────────
   if (order.paymentType === LICENCE_PAYMENT_TYPE.SOFTWARE_PURCHASE) {
     const licenceEndsAt = new Date(now.getTime() + MAINTENANCE_DAYS * 86_400_000);
 
@@ -154,6 +166,31 @@ licenceRoutes.post("/verify", async (c) => {
       }
     );
 
+    // Fire-and-forget receipt email
+    sendEmail({
+      to: gym.email,
+      toName: gym.ownerName,
+      subject: `Palastra licence receipt — ${gym.name}`,
+      htmlContent: purchaseReceiptEmailHtml({
+        gymName: gym.name,
+        ownerName: gym.ownerName,
+        amountPaise: LICENCE_PRICE_PAISE,
+        paymentId: input.razorpay_payment_id,
+        orderId: input.razorpay_order_id,
+        paidOn: now,
+        licenceExpiresAt: licenceEndsAt,
+      }),
+      textContent: purchaseReceiptEmailText({
+        gymName: gym.name,
+        ownerName: gym.ownerName,
+        amountPaise: LICENCE_PRICE_PAISE,
+        paymentId: input.razorpay_payment_id,
+        orderId: input.razorpay_order_id,
+        paidOn: now,
+        licenceExpiresAt: licenceEndsAt,
+      }),
+    }).catch((err) => console.error("[licence] receipt email failed:", err));
+
     return c.json({
       ok: true,
       message: "Licence activated",
@@ -161,9 +198,9 @@ licenceRoutes.post("/verify", async (c) => {
     });
   }
 
-  const gym = await db.collection("gyms").findOne({ _id: gymId });
+  // ─── Maintenance renewal branch ──────────────────────
   const base =
-    gym?.licenceExpiresAt && new Date(gym.licenceExpiresAt) > now
+    gym.licenceExpiresAt && new Date(gym.licenceExpiresAt) > now
       ? new Date(gym.licenceExpiresAt)
       : now;
   const newEnd = new Date(base.getTime() + MAINTENANCE_DAYS * 86_400_000);
@@ -193,6 +230,7 @@ licenceRoutes.post("/verify", async (c) => {
   });
 });
 
+// ─── Licence status ────────────────────────────────────
 licenceRoutes.get("/status", async (c) => {
   const gymId = getGymId(c);
   const gym = await getDb().collection("gyms").findOne({ _id: gymId });
@@ -223,6 +261,7 @@ licenceRoutes.get("/status", async (c) => {
   });
 });
 
+// ─── Renew maintenance (create order) ──────────────────
 licenceRoutes.post("/maintenance", async (c) => {
   const gymId = getGymId(c);
   const db = getDb();

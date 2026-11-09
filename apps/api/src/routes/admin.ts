@@ -11,6 +11,8 @@ import {
 import { getDb } from "@gymora/db";
 import { GymRepo } from "../repositories/gyms.js";
 import { generateActivationCode, hashCode } from "../lib/crypto.js";
+import { sendEmail } from "../lib/email.js";
+import { activationCodeEmailHtml, activationCodeEmailText } from "../templates/activation-code.js";
 import { requireAuth, requireRole } from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
 
@@ -191,9 +193,28 @@ adminRoutes.post("/gyms/:id/approve", async (c) => {
     activationCodeUsedAt: null,
   });
 
+  // Fire-and-forget email (never blocks the response)
+  sendEmail({
+    to: gym.email,
+    toName: gym.ownerName,
+    subject: `Your Palastra activation code: ${code}`,
+    htmlContent: activationCodeEmailHtml({
+      gymName: gym.name,
+      ownerName: gym.ownerName,
+      code,
+      expiresAt,
+    }),
+    textContent: activationCodeEmailText({
+      gymName: gym.name,
+      ownerName: gym.ownerName,
+      code,
+      expiresAt,
+    }),
+  }).catch((err) => console.error("[admin] email send failed:", err));
+
   return c.json({
     ok: true,
-    message: "Approved. Share activation code with the gym owner.",
+    message: "Approved. Activation code sent to gym email.",
     activationCode: code,
     expiresAt,
     email: gym.email,
