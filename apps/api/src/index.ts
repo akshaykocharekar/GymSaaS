@@ -27,14 +27,22 @@ const app = new Hono();
 app.use("*", cors());
 app.onError(errorHandler);
 
-app.get("/health", async (c) => {
-  const dbAlive = await ping();
+// ─── Health: fast, no DB ────────────────────────────────
+app.get("/health", (c) => {
   return c.json({
     ok: true,
-    service: "gymora-api",
+    service: "palastra-api",
     env: env.NODE_ENV,
-    db: dbAlive ? "connected" : "disconnected",
     ts: new Date().toISOString(),
+  });
+});
+
+// ─── Health DB: pings DB, used for readiness probes ─────
+app.get("/health/db", async (c) => {
+  const dbAlive = await ping();
+  return c.json({
+    ok: dbAlive,
+    db: dbAlive ? "connected" : "disconnected",
   });
 });
 
@@ -52,6 +60,7 @@ app.use("/api/gym/reports/*", trialGuard());
 app.use("/api/gym/staff/*", trialGuard());
 app.use("/api/gym/trainers/*", trialGuard());
 app.use("/api/gym/payouts/*", trialGuard());
+app.use("/api/gym/insights/*", trialGuard());
 app.route("/api/gym/plans", planRoutes);
 app.route("/api/gym/members", memberRoutes);
 app.route("/api/gym/payments", paymentRoutes);

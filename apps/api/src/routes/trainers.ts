@@ -19,6 +19,7 @@ import {
   requireAuth,
   requireAnyPermission,
 } from "../middleware/auth.js";
+import { requireParam } from "../lib/params.js";
 import { HTTPException } from "hono/http-exception";
 
 export const trainerRoutes = new Hono();
@@ -68,7 +69,7 @@ trainerRoutes.get(
   async (c) => {
     const repo = new TrainerRepo(getDb());
     const gymId = getGymId(c);
-    const trainer = await repo.findByIdInGym(c.req.param("id"), gymId);
+    const trainer = await repo.findByIdInGym(requireParam(c, "id"), gymId);
     if (!trainer) throw new HTTPException(404, { message: "Trainer not found" });
 
     const packRepo = new SessionPackRepo(getDb());
@@ -169,7 +170,7 @@ trainerRoutes.patch(
     const patch = updateTrainerSchema.parse(body);
     const repo = new TrainerRepo(getDb());
     const updated = await repo.updateInGym(
-      c.req.param("id"),
+      requireParam(c, "id"),
       getGymId(c),
       patch
     );
@@ -246,7 +247,7 @@ trainerRoutes.post(
     const gymId = getGymId(c);
     const packs = new SessionPackRepo(getDb());
 
-    const pack = await packs.findByIdInGym(c.req.param("id"), gymId);
+    const pack = await packs.findByIdInGym(requireParam(c, "id"), gymId);
     if (!pack) throw new HTTPException(404, { message: "Session pack not found" });
 
     // Check expiry
@@ -284,7 +285,7 @@ trainerRoutes.get(
   async (c) => {
     const gymId = getGymId(c);
     const members = new MemberRepo(getDb());
-    const member = await members.findByIdInGym(c.req.param("memberId"), gymId);
+    const member = await members.findByIdInGym(requireParam(c, "memberId"), gymId);
     if (!member) throw new HTTPException(404, { message: "Member not found" });
 
     const packs = await new SessionPackRepo(getDb()).listAllByMember(

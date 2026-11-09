@@ -22,12 +22,15 @@ export async function requireAuth(c: Context, next: Next) {
       message: "Missing or malformed Authorization header",
     });
   }
+  const t1 = performance.now();
   try {
     const payload = verifyAccess(token);
     c.set("auth", payload);
   } catch {
     throw new HTTPException(401, { message: "Invalid or expired token" });
   }
+  const t2 = performance.now();
+  if (t2 - t1 > 5) console.log(`[perf] jwt.verify=${(t2-t1).toFixed(1)}ms`);
   await next();
 }
 

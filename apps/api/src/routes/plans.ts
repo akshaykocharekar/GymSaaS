@@ -7,6 +7,7 @@ import {
   requireAuth,
   requireAnyPermission,
 } from "../middleware/auth.js";
+import { requireParam } from "../lib/params.js";
 import { HTTPException } from "hono/http-exception";
 
 export const planRoutes = new Hono();
@@ -50,7 +51,7 @@ planRoutes.patch("/:id", requireAnyPermission("MANAGE_PLANS"), async (c) => {
   const body = await c.req.json();
   const patch = updatePlanSchema.parse(body);
   const plans = new PlanRepo(getDb());
-  const updated = await plans.updateInGym(c.req.param("id"), getGymId(c), patch);
+  const updated = await plans.updateInGym(requireParam(c, "id"), getGymId(c), patch);
   if (!updated) throw new HTTPException(404, { message: "Plan not found" });
   return c.json({ ok: true });
 });
@@ -58,6 +59,6 @@ planRoutes.patch("/:id", requireAnyPermission("MANAGE_PLANS"), async (c) => {
 // DELETE: MANAGE_PLANS
 planRoutes.delete("/:id", requireAnyPermission("MANAGE_PLANS"), async (c) => {
   const plans = new PlanRepo(getDb());
-  await plans.deactivateInGym(c.req.param("id"), getGymId(c));
+  await plans.deactivateInGym(requireParam(c, "id"), getGymId(c));
   return c.json({ ok: true });
 });

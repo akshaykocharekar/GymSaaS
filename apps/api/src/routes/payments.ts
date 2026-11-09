@@ -87,23 +87,25 @@ paymentRoutes.get(
     const query = listQuerySchema.parse(
       Object.fromEntries(new URL(c.req.url).searchParams)
     );
+    const gymId = getGymId(c);
     const payments = new PaymentRepo(getDb());
     const members = new MemberRepo(getDb());
 
-    const docs = await payments.listByGym(getGymId(c), {
+    const docs = await payments.listByGym(gymId, {
       memberId: query.memberId ? new ObjectId(query.memberId) : undefined,
       method: query.method,
       limit: query.limit,
       offset: query.offset,
     });
 
-    const memberIds = [...new Set(docs.map((d) => d.memberId.toString()))];
-    const memberMap = new Map<string, string>();
-    await Promise.all(
-      memberIds.map(async (id) => {
-        const m = await members.findByIdInGym(id, getGymId(c));
-        if (m) memberMap.set(id, m.fullName);
-      })
+    // ✅ BATCH HYDRATE: one query instead of N
+    const uniqueMemberIds = [
+      ...new Set(docs.map((d) => d.memberId.toString())),
+    ].map((id) => new ObjectId(id));
+
+    const memberDocs = await members.findManyByIdsInGym(uniqueMemberIds, gymId);
+    const memberMap = new Map(
+      memberDocs.map((m) => [m._id.toString(), m.fullName])
     );
 
     return c.json({

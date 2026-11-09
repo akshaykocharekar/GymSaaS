@@ -36,4 +36,22 @@ export type UpdateStaffPermissionsInput = z.infer<
   typeof updateStaffPermissionsSchema
 >;
 
+// ─── Password reset ─────────────────────────────────────
+export const forgotPasswordSchema = z.object({
+  email: emailSchema,
+});
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    token: z.string().trim().min(1, "Token is required"),
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.password === d.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
 export const roleSchema = z.nativeEnum(ROLES);

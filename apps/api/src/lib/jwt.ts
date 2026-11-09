@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import { env } from "../env.js";
 import type { Role, Permission } from "@gymora/shared";
 
@@ -11,13 +11,13 @@ export interface AccessPayload {
 
 export function signAccess(payload: AccessPayload): string {
   return jwt.sign(payload, env.JWT_ACCESS_SECRET, {
-    expiresIn: env.JWT_ACCESS_TTL,
+    expiresIn: env.JWT_ACCESS_TTL as SignOptions["expiresIn"],
   });
 }
 
 export function signRefresh(payload: AccessPayload): string {
   return jwt.sign(payload, env.JWT_REFRESH_SECRET, {
-    expiresIn: env.JWT_REFRESH_TTL,
+    expiresIn: env.JWT_REFRESH_TTL as SignOptions["expiresIn"],
   });
 }
 

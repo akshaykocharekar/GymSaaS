@@ -25,6 +25,26 @@ export interface MemberDoc {
   updatedAt: Date;
 }
 
+// Only fetch fields the API actually returns — reduces payload & memory
+const LIST_PROJECTION = {
+  fullName: 1,
+  phone: 1,
+  email: 1,
+  address: 1,
+  joiningDate: 1,
+  planId: 1,
+  membershipStartDate: 1,
+  expiryDate: 1,
+  isInactive: 1,
+  advanceBalance: 1,
+  trainerId: 1,
+  notes: 1,
+  createdAt: 1,
+} as const;
+
+// Even lighter — for hydration lookups (name only)
+const NAME_PROJECTION = { fullName: 1 } as const;
+
 export class MemberRepo {
   private col: Collection<MemberDoc>;
   constructor(db: Db) {
@@ -37,6 +57,20 @@ export class MemberRepo {
 
   findByIdInGym(id: string, gymId: ObjectId) {
     return this.col.findOne({ _id: new ObjectId(id), gymId });
+  }
+
+  /**
+   * Batch hydrate member names. Single DB query for N members.
+   * Use this instead of calling findByIdInGym in a loop.
+   */
+  async findManyByIdsInGym(
+    ids: ObjectId[],
+    gymId: ObjectId
+  ): Promise<Array<{ _id: ObjectId; fullName: string }>> {
+    if (ids.length === 0) return [];
+    return this.col
+      .find({ _id: { $in: ids }, gymId }, { projection: NAME_PROJECTION })
+      .toArray() as unknown as Promise<Array<{ _id: ObjectId; fullName: string }>>;
   }
 
   create(gymId: ObjectId, expiryDate: Date, input: CreateMemberInput) {
@@ -107,6 +141,11 @@ export class MemberRepo {
     );
   }
 
+  /**
+   * List members with projection.
+   * NOTE: We no longer return `total` — removed for performance.
+   * If you need total, use `/api/gym/dashboard` counts.
+   */
   async list(gymId: ObjectId, query: MemberListQuery) {
     const now = new Date();
     const filter: Record<string, unknown> = { gymId };
@@ -134,15 +173,13 @@ export class MemberRepo {
       ];
     }
 
-    const [docs, total] = await Promise.all([
-      this.col
-        .find(filter)
-        .sort({ expiryDate: 1 })
-        .skip(query.offset)
-        .limit(query.limit)
-        .toArray(),
-      this.col.countDocuments(filter),
-    ]);
-    return { docs, total };
+    const docs = await this.col
+      .find(filter, { projection: LIST_PROJECTION })
+      .sort({ expiryDate: 1 })
+      .skip(query.offset)
+      .limit(query.limit)
+      .toArray();
+
+    return { docs };
   }
 }

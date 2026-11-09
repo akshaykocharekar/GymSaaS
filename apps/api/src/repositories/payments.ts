@@ -14,6 +14,15 @@ export interface PaymentDoc {
   createdAt: Date;
 }
 
+const LIST_PROJECTION = {
+  memberId: 1,
+  amount: 1,
+  method: 1,
+  paymentDate: 1,
+  note: 1,
+  createdAt: 1,
+} as const;
+
 export class PaymentRepo {
   private col: Collection<PaymentDoc>;
   constructor(db: Db) {
@@ -37,7 +46,7 @@ export class PaymentRepo {
     if (opts.memberId) filter.memberId = opts.memberId;
     if (opts.method) filter.method = opts.method;
     return this.col
-      .find(filter)
+      .find(filter, { projection: LIST_PROJECTION })
       .sort({ createdAt: -1 })
       .skip(opts.offset)
       .limit(opts.limit)
@@ -46,7 +55,7 @@ export class PaymentRepo {
 
   listByMemberInGym(memberId: ObjectId, gymId: ObjectId) {
     return this.col
-      .find({ gymId, memberId })
+      .find({ gymId, memberId }, { projection: LIST_PROJECTION })
       .sort({ createdAt: -1 })
       .toArray();
   }

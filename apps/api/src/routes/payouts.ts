@@ -8,6 +8,7 @@ import {
   requireAuth,
   requireAnyPermission,
 } from "../middleware/auth.js";
+import { requireParam } from "../lib/params.js";
 import { HTTPException } from "hono/http-exception";
 
 export const payoutRoutes = new Hono();
@@ -58,7 +59,7 @@ payoutRoutes.get(
     const gymId = getGymId(c);
     const trainers = new TrainerRepo(getDb());
     const trainer = await trainers.findByIdInGym(
-      c.req.param("trainerId"),
+      requireParam(c, "trainerId"),
       gymId
     );
     if (!trainer) throw new HTTPException(404, { message: "Trainer not found" });

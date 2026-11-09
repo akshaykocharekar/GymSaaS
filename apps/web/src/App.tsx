@@ -8,6 +8,8 @@ import About from "./pages/legal/About.js";
 import Shipping from "./pages/legal/Shipping.js";
 import Register from "./pages/Register.js";
 import Login from "./pages/Login.js";
+import ForgotPassword from "./pages/ForgotPassword.js";
+import ResetPassword from "./pages/ResetPassword.js";
 import Activate from "./pages/Activate.js";
 import Dashboard from "./pages/Dashboard.js";
 import Members from "./pages/Members.js";
@@ -47,6 +49,8 @@ export default function App() {
       <Route path="/legal/shipping" element={<Shipping />} />
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/activate" element={<Activate />} />
       <Route path="/trial-expired" element={<TrialExpired />} />
 

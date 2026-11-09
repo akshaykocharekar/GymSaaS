@@ -5,7 +5,6 @@ import {
   updateMemberSchema,
   setInactiveSchema,
   memberListQuerySchema,
-  ROLES,
   MAX_MEMBERS_PER_GYM,
   PAYMENT_METHOD,
 } from "@gymora/shared";
@@ -16,10 +15,8 @@ import { PlanRepo } from "../repositories/plans.js";
 import { PaymentRepo } from "../repositories/payments.js";
 import { HistoryRepo } from "../repositories/history.js";
 import { computeMemberStatus } from "../lib/memberStatus.js";
-import {
-  requireAuth,
-  requireAnyPermission,
-} from "../middleware/auth.js";
+import { requireParam } from "../lib/params.js";
+import { requireAuth, requireAnyPermission } from "../middleware/auth.js";
 import { HTTPException } from "hono/http-exception";
 
 export const memberRoutes = new Hono();
@@ -58,7 +55,6 @@ function serializeMember(m: any) {
   };
 }
 
-// ─── GET list ──────────────────────────────────────────
 memberRoutes.get(
   "/",
   requireAnyPermission("VIEW_MEMBERS", "MANAGE_MEMBERS"),
@@ -67,12 +63,11 @@ memberRoutes.get(
       Object.fromEntries(new URL(c.req.url).searchParams)
     );
     const members = new MemberRepo(getDb());
-    const { docs, total } = await members.list(getGymId(c), query);
-    return c.json({ ok: true, total, members: docs.map(serializeMember) });
+    const { docs } = await members.list(getGymId(c), query);
+    return c.json({ ok: true, members: docs.map(serializeMember) });
   }
 );
 
-// ─── POST create (with optional initial payment) ───────
 memberRoutes.post(
   "/",
   requireAnyPermission("MANAGE_MEMBERS"),
@@ -102,9 +97,7 @@ memberRoutes.post(
     const res = await members.create(gymId, expiryDate, input);
     const memberId = res.insertedId;
 
-    // Record initial payment + history unless explicitly disabled
-    const shouldCollect = input.collectPayment !== false;
-    if (shouldCollect) {
+    if (input.collectPayment !== false) {
       const amount = input.initialPaymentAmount ?? plan.price;
 
       if (amount > 0) {
@@ -135,19 +128,17 @@ memberRoutes.post(
   }
 );
 
-// ─── GET one ───────────────────────────────────────────
 memberRoutes.get(
   "/:id",
   requireAnyPermission("VIEW_MEMBERS", "MANAGE_MEMBERS"),
   async (c) => {
     const members = new MemberRepo(getDb());
-    const m = await members.findByIdInGym(c.req.param("id"), getGymId(c));
+    const m = await members.findByIdInGym(requireParam(c, "id"), getGymId(c));
     if (!m) throw new HTTPException(404, { message: "Member not found" });
     return c.json({ ok: true, member: serializeMember(m) });
   }
 );
 
-// ─── PATCH edit ────────────────────────────────────────
 memberRoutes.patch(
   "/:id",
   requireAnyPermission("MANAGE_MEMBERS"),
@@ -156,10 +147,11 @@ memberRoutes.patch(
     const patch = updateMemberSchema.parse(body);
     const gymId = getGymId(c);
     const members = new MemberRepo(getDb());
+    const id = requireParam(c, "id");
 
     let expiryDate: Date | undefined;
     if (patch.planId || patch.membershipStartDate) {
-      const existing = await members.findByIdInGym(c.req.param("id"), gymId);
+      const existing = await members.findByIdInGym(id, gymId);
       if (!existing) throw new HTTPException(404, { message: "Member not found" });
       const plans = new PlanRepo(getDb());
       const plan = await plans.findByIdInGym(
@@ -171,7 +163,7 @@ memberRoutes.patch(
       expiryDate = new Date(start.getTime() + plan.durationDays * 86_400_000);
     }
 
-    const updated = await members.updateInGym(c.req.param("id"), gymId, {
+    const updated = await members.updateInGym(id, gymId, {
       ...patch,
       expiryDate,
     });
@@ -180,7 +172,6 @@ memberRoutes.patch(
   }
 );
 
-// ─── PATCH toggle inactive ─────────────────────────────
 memberRoutes.patch(
   "/:id/inactive",
   requireAnyPermission("MANAGE_MEMBERS"),
@@ -188,7 +179,7 @@ memberRoutes.patch(
     const body = await c.req.json();
     const input = setInactiveSchema.parse(body);
     const members = new MemberRepo(getDb());
-    const updated = await members.updateInGym(c.req.param("id"), getGymId(c), {
+    const updated = await members.updateInGym(requireParam(c, "id"), getGymId(c), {
       isInactive: input.isInactive,
     });
     if (!updated) throw new HTTPException(404, { message: "Member not found" });
@@ -196,7 +187,6 @@ memberRoutes.patch(
   }
 );
 
-// ─── POST renew ────────────────────────────────────────
 const renewSchema = z.object({
   planId: z.string().min(1),
   amountPaid: z.number().int().nonnegative().optional(),
@@ -216,8 +206,9 @@ memberRoutes.post(
     const plans = new PlanRepo(getDb());
     const payments = new PaymentRepo(getDb());
     const history = new HistoryRepo(getDb());
+    const id = requireParam(c, "id");
 
-    const member = await members.findByIdInGym(c.req.param("id"), gymId);
+    const member = await members.findByIdInGym(id, gymId);
     if (!member) throw new HTTPException(404, { message: "Member not found" });
 
     const plan = await plans.findByIdInGym(input.planId, gymId);
@@ -279,15 +270,12 @@ memberRoutes.post(
   }
 );
 
-// ─── GET payments for a member ─────────────────────────
 memberRoutes.get(
   "/:id/payments",
   requireAnyPermission("VIEW_PAYMENTS", "RECORD_PAYMENTS", "MANAGE_MEMBERS"),
   async (c) => {
-    const member = await new MemberRepo(getDb()).findByIdInGym(
-      c.req.param("id"),
-      getGymId(c)
-    );
+    const id = requireParam(c, "id");
+    const member = await new MemberRepo(getDb()).findByIdInGym(id, getGymId(c));
     if (!member) throw new HTTPException(404, { message: "Member not found" });
 
     const payments = await new PaymentRepo(getDb()).listByMemberInGym(
@@ -301,21 +289,19 @@ memberRoutes.get(
         amount: p.amount,
         method: p.method,
         paymentDate: p.paymentDate,
+        createdAt: (p as any).createdAt,
         note: p.note,
       })),
     });
   }
 );
 
-// ─── GET history for a member ──────────────────────────
 memberRoutes.get(
   "/:id/history",
   requireAnyPermission("VIEW_MEMBERS", "MANAGE_MEMBERS"),
   async (c) => {
-    const member = await new MemberRepo(getDb()).findByIdInGym(
-      c.req.param("id"),
-      getGymId(c)
-    );
+    const id = requireParam(c, "id");
+    const member = await new MemberRepo(getDb()).findByIdInGym(id, getGymId(c));
     if (!member) throw new HTTPException(404, { message: "Member not found" });
 
     const rows = await new HistoryRepo(getDb()).listByMemberInGym(

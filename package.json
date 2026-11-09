@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@9.12.0",
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "pnpm --filter @gymora/shared build && pnpm --filter @gymora/db build && pnpm --filter @gymora/api build && pnpm --filter @gymora/web build",
     "dev": "pnpm -r --parallel dev",
     "test": "pnpm -r test",
     "lint": "pnpm -r lint",
