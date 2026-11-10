@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256" role="img" aria-label="Palastra icon">
+  <title>Palastra</title>
+  <defs>
+    <linearGradient id="pg" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="0.45" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#ea580c"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#pg)" fill-rule="evenodd" d="M10 6H40L56 22V32L40 48H26V58H10ZM26 18H38L44 24V30L38 36H26Z"/>
+  <rect fill="url(#pg)" x="2" y="16" width="4" height="30"/>
+</svg>

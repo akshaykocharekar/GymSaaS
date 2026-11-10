@@ -30,9 +30,7 @@ function Shell({ children }: { children: ReactNode }) {
 
       <div className="mx-auto flex min-h-screen w-full max-w-md flex-col px-5 py-8 sm:py-12">
         <Link to="/" className="mb-8 flex items-center justify-center gap-2 text-[15px] font-semibold tracking-tight text-white">
-          <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-orange-300 to-orange-500 text-sm font-bold text-orange-950 shadow-md shadow-orange-500/30">
-            G
-          </span>
+          <img src="/logo.svg" alt="Palastra" className="h-7 w-7 drop-shadow-md" />
           Palastra
         </Link>
         <div className="flex flex-1 items-start sm:items-center">{children}</div>

@@ -683,7 +683,7 @@ export default function Landing() {
       <footer className="border-t border-white/5 pb-20 md:pb-0">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row justify-between gap-8 text-sm text-stone-500">
           <div className="max-w-xs">
-            <div className="font-semibold text-white mb-1">Palastra</div>
+            <div className="flex items-center gap-2 font-semibold text-white mb-1"><img src="/logo.svg" alt="Palastra" className="h-5 w-5 drop-shadow-md" /> Palastra</div>
             <div>Built for independent gyms in India.</div>
             <div className="mt-3 text-xs text-stone-600">
               Operated by Akshay Kocharekar

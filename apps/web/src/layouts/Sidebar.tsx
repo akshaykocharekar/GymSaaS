@@ -37,9 +37,7 @@ export default function Sidebar() {
     <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-white/5 bg-[#0c0a09] h-screen sticky top-0">
       <div className="px-6 py-6 border-b border-white/5">
         <div className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-white">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-orange-300 to-orange-500 text-sm font-bold text-orange-950 shadow-md shadow-orange-500/30">
-            P
-          </span>
+          <img src="/logo.svg" alt="Palastra" className="h-8 w-8 drop-shadow-md" />
           Palastra
         </div>
         <div className="mt-3 truncate text-xs text-stone-500">
