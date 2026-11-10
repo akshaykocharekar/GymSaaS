@@ -27,10 +27,10 @@ export default function TrialBanner() {
     isExpired || (isTrial && daysLeft !== null && daysLeft <= 0);
 
   const tone = effectivelyExpired
-    ? "bg-red-50 border-red-200 text-red-900"
+    ? "border-rose-400/20 bg-rose-400/10 text-rose-200"
     : daysLeft !== null && daysLeft <= 5
-    ? "bg-amber-50 border-amber-200 text-amber-900"
-    : "bg-primary-50 border-primary-200 text-primary-900";
+    ? "border-amber-400/30 bg-amber-400/15 text-amber-200"
+    : "border-amber-400/20 bg-amber-400/10 text-amber-200";
 
   let message: string;
   if (effectivelyExpired) {
@@ -50,13 +50,13 @@ export default function TrialBanner() {
         <div className="flex items-center gap-2 shrink-0">
           <Link
             to="/app/billing"
-            className="px-3 py-1 rounded-md bg-white/70 hover:bg-white text-xs font-medium"
+            className="rounded-full border border-orange-400/30 bg-orange-400/10 px-3 py-1.5 text-xs font-semibold text-orange-300 transition-colors hover:bg-orange-400/20 hover:text-orange-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/70"
           >
             Buy ₹1,999
           </Link>
           <button
             onClick={() => setDismissed(true)}
-            className="w-6 h-6 flex items-center justify-center rounded hover:bg-black/5"
+            className="flex h-8 w-8 items-center justify-center rounded-lg opacity-70 transition hover:bg-white/10 hover:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/70"
             aria-label="Dismiss"
           >
             <svg

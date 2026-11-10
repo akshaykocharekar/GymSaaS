@@ -5,7 +5,6 @@ import { useAuth } from "../context/AuthContext.js";
 import { useGym } from "../context/GymContext.js";
 import Badge from "../components/ui/Badge.js";
 import Button from "../components/ui/Button.js";
-import Card from "../components/ui/Card.js";
 import Skeleton from "../components/ui/Skeleton.js";
 import { useToast } from "../components/Toast.js";
 import PaymentSheet from "../components/PaymentSheet.js";
@@ -60,6 +59,8 @@ interface SessionPack {
 }
 
 type Tab = "details" | "payments" | "history";
+
+const panel = "rounded-2xl border border-white/10 bg-white/[0.03]";
 
 export default function MemberDetail() {
   const { id } = useParams();
@@ -148,9 +149,12 @@ export default function MemberDetail() {
 
   if (!member) {
     return (
-      <div className="max-w-2xl mx-auto p-4 space-y-3">
+      <div className="max-w-2xl lg:max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 space-y-3">
         <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-32 w-full" />
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 space-y-3 lg:space-y-0">
+          <Skeleton className="h-40 w-full lg:col-span-4" />
+          <Skeleton className="h-64 w-full lg:col-span-8" />
+        </div>
       </div>
     );
   }
@@ -158,25 +162,29 @@ export default function MemberDetail() {
   const daysLeft = Math.ceil(
     (new Date(member.expiryDate).getTime() - Date.now()) / 86_400_000
   );
+  const daysClass =
+    daysLeft < 0 ? "text-rose-300" : daysLeft <= 7 ? "text-amber-300" : "text-white";
 
   return (
-    <div className="max-w-2xl mx-auto pb-20">
-      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur px-4 sm:px-6 pt-4 pb-3 border-b border-slate-200/60 flex items-center gap-3">
+    <div className="max-w-2xl lg:max-w-5xl mx-auto pb-20 lg:pb-10">
+      <div className="sticky top-0 z-20 backdrop-blur bg-[#0c0a09]/80 px-4 sm:px-6 lg:px-8 pt-4 pb-3 border-b border-white/5 flex items-center gap-3">
         <button
           onClick={() => nav(-1)}
-          className="w-9 h-9 rounded-full hover:bg-slate-100 flex items-center justify-center"
+          aria-label="Back"
+          className="w-10 h-10 rounded-full text-stone-300 transition-colors hover:bg-white/[0.06] hover:text-white flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/70"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M15 18l-6-6 6-6" />
           </svg>
         </button>
-        <h1 className="text-lg font-bold text-slate-900">Member</h1>
+        <h1 className="text-lg font-semibold tracking-tight text-white">Member</h1>
       </div>
 
-      <div className="px-4 sm:px-6 py-4 space-y-4">
-        <Card className="p-5">
+      <div className="px-4 sm:px-6 lg:px-8 py-4 lg:py-8 space-y-4 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-8 lg:items-start">
+        {/* Profile: sticky side column on desktop */}
+        <section className={`${panel} p-4 sm:p-5 lg:col-span-4 lg:sticky lg:top-24`}>
           <div className="flex items-start gap-3">
-            <div className="w-14 h-14 rounded-full bg-primary-50 text-primary-700 flex items-center justify-center font-semibold text-lg shrink-0">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange-300 to-orange-500 text-lg font-semibold text-orange-950">
               {member.fullName
                 .split(" ")
                 .map((s) => s[0])
@@ -185,14 +193,14 @@ export default function MemberDetail() {
                 .toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-xl font-semibold tracking-tight text-white break-words">
                 {member.fullName}
               </h2>
-              <div className="text-sm text-slate-600">{member.phone}</div>
+              <div className="text-sm text-stone-400">{member.phone}</div>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Badge status={member.status} />
                 {member.advanceBalance > 0 && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                  <span className="inline-flex items-center rounded-full bg-amber-400/10 px-2 py-0.5 text-xs font-medium text-amber-300 ring-1 ring-inset ring-amber-400/25">
                     ₹{member.advanceBalance} advance
                   </span>
                 )}
@@ -200,7 +208,7 @@ export default function MemberDetail() {
             </div>
             <button
               onClick={() => setWaOpen(true)}
-              className="shrink-0 w-10 h-10 rounded-full bg-green-50 text-green-700 flex items-center justify-center hover:bg-green-100"
+              className="shrink-0 w-10 h-10 rounded-full bg-emerald-400/10 text-emerald-300 ring-1 ring-inset ring-emerald-400/25 flex items-center justify-center transition-colors hover:bg-emerald-400/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70"
               aria-label="Send WhatsApp"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -228,150 +236,153 @@ export default function MemberDetail() {
               )}
             </div>
           )}
-        </Card>
+        </section>
 
-        <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
-          {(["details", "payments", "history"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg capitalize transition-colors ${
-                tab === t
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-600"
-              }`}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        {tab === "details" && (
-          <>
-            <Card className="p-5 space-y-3">
-              <Row
-                label="Plan expiry"
-                value={new Date(member.expiryDate).toLocaleDateString("en-IN", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
-              />
-              <Row
-                label="Days remaining"
-                value={
-                  daysLeft > 0
-                    ? `${daysLeft} day${daysLeft === 1 ? "" : "s"}`
-                    : daysLeft === 0
-                    ? "Today"
-                    : `${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? "" : "s"} ago`
-                }
-              />
-              {member.advanceBalance > 0 && (
-                <Row label="Advance balance" value={`₹${member.advanceBalance}`} />
-              )}
-              <Row
-                label="Joined"
-                value={new Date(member.joiningDate).toLocaleDateString("en-IN")}
-              />
-              {member.email && <Row label="Email" value={member.email} />}
-              {member.address && <Row label="Address" value={member.address} />}
-              {member.notes && <Row label="Notes" value={member.notes} />}
-            </Card>
-
-            {/* Session packs */}
-            {canSeeTrainers && (
-              <Card className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="text-[11px] font-medium uppercase tracking-wider text-slate-500">
-                    Session packs
-                  </div>
-                  {canManage && (
-                    <button
-                      onClick={() => setPackOpen(true)}
-                      className="text-xs font-medium text-primary-600 hover:text-primary-700"
-                    >
-                      + Add pack
-                    </button>
-                  )}
-                </div>
-                {packs === null ? (
-                  <Skeleton className="h-12 w-full" />
-                ) : packs.length === 0 ? (
-                  <p className="text-sm text-slate-500">
-                    No session packs yet.
-                  </p>
-                ) : (
-                  <div className="space-y-2">
-                    {packs.map((p) => {
-                      const isExpired = p.expiresAt && new Date(p.expiresAt) < new Date();
-                      return (
-                        <div
-                          key={p.id}
-                          className={`border rounded-lg p-3 flex items-center justify-between gap-3 ${
-                            isExpired
-                              ? "border-slate-100 bg-slate-50 opacity-60"
-                              : "border-slate-100"
-                          }`}
-                        >
-                          <div className="min-w-0">
-                            <div className="text-sm font-medium text-slate-900">
-                              {p.typeLabel}
-                              {isExpired && (
-                                <span className="ml-1.5 text-[10px] text-rose-600 font-medium uppercase">
-                                  expired
-                                </span>
-                              )}
-                            </div>
-                            <div className="text-xs text-slate-500">
-                              {p.sessionsUsed}/{p.sessionsPurchased} used ·{" "}
-                              <span
-                                className={
-                                  p.remaining > 0
-                                    ? "text-emerald-600 font-medium"
-                                    : "text-slate-400"
-                                }
-                              >
-                                {p.remaining} remaining
-                              </span>
-                            </div>
-                          </div>
-                          {canManage && p.remaining > 0 && !isExpired && (
-                            <button
-                              onClick={() => logSessions(p.id, p.remaining)}
-                              className="shrink-0 px-2.5 py-1 rounded bg-slate-900 text-white text-xs font-medium hover:bg-slate-800"
-                            >
-                              Log used
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </Card>
-            )}
-
-            {canManage && (
-              <Button
-                variant={member.isInactive ? "secondary" : "danger"}
-                fullWidth
-                size="lg"
-                onClick={toggleInactive}
-                loading={busy}
+        {/* Tabs + content */}
+        <div className="space-y-4 lg:col-span-8 min-w-0">
+          <div className="flex gap-1 rounded-xl border border-white/10 bg-white/[0.04] p-1">
+            {(["details", "payments", "history"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                aria-pressed={tab === t}
+                className={`flex-1 rounded-lg py-2 text-sm capitalize transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/70 ${
+                  tab === t
+                    ? "bg-orange-400 font-semibold text-orange-950 shadow-sm shadow-orange-500/30"
+                    : "font-medium text-stone-400 hover:text-white"
+                }`}
               >
-                {member.isInactive ? "Reactivate member" : "Mark inactive"}
-              </Button>
-            )}
-          </>
-        )}
+                {t}
+              </button>
+            ))}
+          </div>
 
-        {tab === "payments" && (
-          <PaymentsTab memberId={member.id} key={refreshKey} />
-        )}
-        {tab === "history" && (
-          <HistoryTab memberId={member.id} key={refreshKey} />
-        )}
+          {tab === "details" && (
+            <>
+              <section className={`${panel} divide-y divide-white/5 px-4 sm:px-5`}>
+                <Row
+                  label="Plan expiry"
+                  value={new Date(member.expiryDate).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                />
+                <Row
+                  label="Days remaining"
+                  valueClass={daysClass}
+                  value={
+                    daysLeft > 0
+                      ? `${daysLeft} day${daysLeft === 1 ? "" : "s"}`
+                      : daysLeft === 0
+                      ? "Today"
+                      : `${Math.abs(daysLeft)} day${Math.abs(daysLeft) === 1 ? "" : "s"} ago`
+                  }
+                />
+                {member.advanceBalance > 0 && (
+                  <Row label="Advance balance" value={`₹${member.advanceBalance}`} />
+                )}
+                <Row
+                  label="Joined"
+                  value={new Date(member.joiningDate).toLocaleDateString("en-IN")}
+                />
+                {member.email && <Row label="Email" value={member.email} />}
+                {member.address && <Row label="Address" value={member.address} />}
+                {member.notes && <Row label="Notes" value={member.notes} />}
+              </section>
+
+              {/* Session packs */}
+              {canSeeTrainers && (
+                <section className={`${panel} p-4 sm:p-5`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-[11px] font-medium uppercase tracking-wider text-stone-400">
+                      Session packs
+                    </div>
+                    {canManage && (
+                      <button
+                        onClick={() => setPackOpen(true)}
+                        className="text-xs font-medium text-orange-300 transition-colors hover:text-orange-200"
+                      >
+                        + Add pack
+                      </button>
+                    )}
+                  </div>
+                  {packs === null ? (
+                    <Skeleton className="h-12 w-full" />
+                  ) : packs.length === 0 ? (
+                    <p className="text-sm text-stone-500">No session packs yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {packs.map((p) => {
+                        const isExpired = p.expiresAt && new Date(p.expiresAt) < new Date();
+                        return (
+                          <div
+                            key={p.id}
+                            className={`rounded-xl border p-3 flex items-center justify-between gap-3 ${
+                              isExpired
+                                ? "border-white/5 bg-white/[0.02] opacity-60"
+                                : "border-white/10 bg-white/[0.03]"
+                            }`}
+                          >
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-stone-200">
+                                {p.typeLabel}
+                                {isExpired && (
+                                  <span className="ml-1.5 text-[10px] font-medium uppercase text-rose-300">
+                                    expired
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs text-stone-500">
+                                {p.sessionsUsed}/{p.sessionsPurchased} used ·{" "}
+                                <span
+                                  className={
+                                    p.remaining > 0
+                                      ? "font-medium text-emerald-300"
+                                      : "text-stone-600"
+                                  }
+                                >
+                                  {p.remaining} remaining
+                                </span>
+                              </div>
+                            </div>
+                            {canManage && p.remaining > 0 && !isExpired && (
+                              <button
+                                onClick={() => logSessions(p.id, p.remaining)}
+                                className="shrink-0 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-stone-200 transition-colors hover:bg-white/[0.08] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-orange-300/70"
+                              >
+                                Log used
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {canManage && (
+                <Button
+                  variant={member.isInactive ? "secondary" : "danger"}
+                  fullWidth
+                  size="lg"
+                  onClick={toggleInactive}
+                  loading={busy}
+                >
+                  {member.isInactive ? "Reactivate member" : "Mark inactive"}
+                </Button>
+              )}
+            </>
+          )}
+
+          {tab === "payments" && (
+            <PaymentsTab memberId={member.id} key={refreshKey} />
+          )}
+          {tab === "history" && (
+            <HistoryTab memberId={member.id} key={refreshKey} />
+          )}
+        </div>
       </div>
 
       {canRecord && (
@@ -436,17 +447,16 @@ function PaymentsTab({ memberId }: { memberId: string }) {
   if (!payments) return <Skeleton className="h-24 w-full" />;
   if (payments.length === 0)
     return (
-      <Card className="p-6 text-center text-sm text-slate-500">
+      <div className={`${panel} p-6 text-center text-sm text-stone-500`}>
         No payments recorded yet.
-      </Card>
+      </div>
     );
   return (
-    <div className="space-y-2">
+    <div className={`${panel} divide-y divide-white/5 px-4 sm:px-5`}>
       {payments.map((p: any) => (
-        <Card key={p.id} className="p-4 flex items-center justify-between">
-          <div>
-            <div className="text-sm font-medium text-slate-900">₹{p.amount}</div>
-            <div className="text-xs text-slate-500">
+        <div key={p.id} className="flex items-center justify-between gap-3 py-3">
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-stone-200">
               {new Date(p.paymentDate).toLocaleDateString("en-IN", {
                 day: "numeric",
                 month: "short",
@@ -456,12 +466,15 @@ function PaymentsTab({ memberId }: { memberId: string }) {
                   hour: "numeric",
                   minute: "2-digit",
                   hour12: true,
-                })}`}{" "}
-              · {p.method}
+                })}`}
+            </div>
+            <div className="text-xs text-stone-500 break-words">
+              {p.method}
               {p.note ? ` · ${p.note}` : ""}
             </div>
           </div>
-        </Card>
+          <div className="shrink-0 font-semibold text-white">₹{p.amount}</div>
+        </div>
       ))}
     </div>
   );
@@ -481,16 +494,16 @@ function HistoryTab({ memberId }: { memberId: string }) {
   if (!rows) return <Skeleton className="h-24 w-full" />;
   if (rows.length === 0)
     return (
-      <Card className="p-6 text-center text-sm text-slate-500">
+      <div className={`${panel} p-6 text-center text-sm text-stone-500`}>
         No renewals yet.
-      </Card>
+      </div>
     );
   return (
-    <div className="space-y-2">
+    <div className={`${panel} divide-y divide-white/5 px-4 sm:px-5`}>
       {rows.map((h) => (
-        <Card key={h.id} className="p-4">
-          <div className="text-sm font-medium text-slate-900">{h.planName}</div>
-          <div className="text-xs text-slate-500 mt-0.5">
+        <div key={h.id} className="py-3">
+          <div className="text-sm font-medium text-stone-200">{h.planName}</div>
+          <div className="text-xs text-stone-500 mt-0.5">
             {new Date(h.startDate).toLocaleDateString("en-IN")} →{" "}
             {new Date(h.expiryDate).toLocaleDateString("en-IN")} ·{" "}
             {h.durationDays}d
@@ -498,17 +511,25 @@ function HistoryTab({ memberId }: { memberId: string }) {
               ? ` · ₹${h.amountPaid} collected`
               : " · from advance"}
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({
+  label,
+  value,
+  valueClass = "text-white",
+}: {
+  label: string;
+  value: string;
+  valueClass?: string;
+}) {
   return (
-    <div className="flex justify-between gap-3 text-sm">
-      <span className="text-slate-500">{label}</span>
-      <span className="text-slate-900 font-medium text-right">{value}</span>
+    <div className="flex justify-between gap-3 py-3 text-sm">
+      <span className="text-stone-500 shrink-0">{label}</span>
+      <span className={`font-medium text-right break-words min-w-0 ${valueClass}`}>{value}</span>
     </div>
   );
 }

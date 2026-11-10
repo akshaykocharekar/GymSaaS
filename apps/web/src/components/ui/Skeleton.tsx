@@ -5,7 +5,7 @@ interface Props {
 export default function Skeleton({ className = "" }: Props) {
   return (
     <div
-      className={`animate-pulse bg-slate-200/70 rounded-lg ${className}`}
+      className={`animate-pulse rounded-xl bg-white/[0.06] motion-reduce:animate-none ${className}`}
     />
   );
 }

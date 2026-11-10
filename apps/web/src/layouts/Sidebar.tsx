@@ -17,6 +17,7 @@ const links: LinkDef[] = [
   { to: "/app/plans", label: "Plans", perm: "VIEW_PLANS" },
   { to: "/app/trainers", label: "Trainers", perm: "VIEW_TRAINERS" },
   { to: "/app/reports", label: "Reports", perm: "VIEW_REPORTS" },
+  { to: "/app/insights", label: "Insights", perm: "VIEW_REPORTS" },
   { to: "/app/billing", label: "Billing", ownerOnly: true },
   { to: "/app/staff", label: "Staff", ownerOnly: true },
   { to: "/app/profile", label: "Gym Profile" },
@@ -33,16 +34,19 @@ export default function Sidebar() {
   });
 
   return (
-    <aside className="hidden lg:flex lg:flex-col w-64 border-r border-slate-200 bg-white min-h-screen sticky top-0">
-      <div className="px-6 py-6 border-b border-slate-100">
-        <div className="text-xl font-bold text-primary-600 tracking-tight">
+    <aside className="hidden lg:flex lg:flex-col w-64 shrink-0 border-r border-white/5 bg-[#0c0a09] h-screen sticky top-0">
+      <div className="px-6 py-6 border-b border-white/5">
+        <div className="flex items-center gap-2.5 text-lg font-semibold tracking-tight text-white">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-orange-300 to-orange-500 text-sm font-bold text-orange-950 shadow-md shadow-orange-500/30">
+            P
+          </span>
           Palastra
         </div>
-        <div className="text-xs text-slate-500 mt-1 truncate">
+        <div className="mt-3 truncate text-xs text-stone-500">
           {user?.email}
         </div>
         {user?.role === "STAFF" && (
-          <div className="text-[10px] text-slate-400 uppercase tracking-wider mt-1">
+          <div className="mt-2 inline-flex rounded-full bg-white/[0.06] px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-stone-400 ring-1 ring-white/10">
             Staff
           </div>
         )}
@@ -53,10 +57,10 @@ export default function Sidebar() {
             key={l.to}
             to={l.to}
             className={({ isActive }) =>
-              `block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              `block rounded-xl px-3.5 py-2.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-primary-50 text-primary-700"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                  ? "bg-orange-400/10 text-orange-200 ring-1 ring-orange-400/20"
+                  : "text-stone-400 hover:bg-white/[0.04] hover:text-stone-100"
               }`
             }
           >
@@ -64,10 +68,10 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      <div className="px-3 py-4 border-t border-slate-100">
+      <div className="px-3 py-4 border-t border-white/5">
         <button
           onClick={logout}
-          className="w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50"
+          className="w-full rounded-xl px-3.5 py-2.5 text-left text-sm font-medium text-stone-400 transition-colors hover:bg-rose-400/10 hover:text-rose-300"
         >
           Log out
         </button>

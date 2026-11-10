@@ -2,10 +2,8 @@ import { FormEvent, useEffect, useState } from "react";
 import { api, ApiError } from "../lib/api.js";
 import { useAuth } from "../context/AuthContext.js";
 import { useGym } from "../context/GymContext.js";
-import Card from "../components/ui/Card.js";
 import Button from "../components/ui/Button.js";
 import FormField from "../components/FormField.js";
-import Skeleton from "../components/ui/Skeleton.js";
 import { useToast } from "../components/Toast.js";
 
 interface GymProfile {
@@ -60,26 +58,37 @@ export default function Profile() {
   if (!gym) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-3">
-        <Skeleton className="h-8 w-32" />
-        <Skeleton className="h-64 w-full" />
+        <div className="h-8 w-32 animate-pulse rounded-lg bg-white/[0.08]" />
+        <div className="h-64 w-full animate-pulse rounded-2xl bg-white/[0.06]" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-4">
+    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-5">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-slate-900">
+        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-white">
           Gym profile
         </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <p className="text-sm text-stone-500 mt-1">
           {isOwner
             ? "Update your gym's details"
             : "Contact the owner to edit these details"}
         </p>
       </div>
 
-      <Card className="p-5">
+      <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 sm:p-6">
+        {/* identity strip */}
+        <div className="mb-6 flex items-center gap-3.5 border-b border-white/5 pb-5">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-orange-300 to-orange-500 text-lg font-bold text-orange-950 shadow-lg shadow-orange-500/20">
+            {gym.name.trim().charAt(0).toUpperCase() || "G"}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate font-semibold text-white">{gym.name}</div>
+            <div className="truncate text-xs text-stone-500">{gym.email}</div>
+          </div>
+        </div>
+
         <form onSubmit={onSubmit} className="space-y-4">
           <FormField
             label="Gym name"
@@ -100,15 +109,16 @@ export default function Profile() {
             required
           />
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
+            <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-stone-300">
               Email
             </label>
             <input
+              id="email"
               value={gym.email}
               disabled
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-500 cursor-not-allowed"
+              className="w-full cursor-not-allowed rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-3 text-base text-stone-500 sm:text-sm"
             />
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="mt-1.5 text-xs text-stone-500">
               Email cannot be changed (used for login)
             </p>
           </div>
@@ -131,7 +141,11 @@ export default function Profile() {
             required
           />
 
-          {error && <p className="text-sm text-rose-600">{error}</p>}
+          {error && (
+            <p role="alert" className="rounded-xl border border-rose-400/20 bg-rose-400/10 px-3.5 py-2.5 text-sm text-rose-300">
+              {error}
+            </p>
+          )}
 
           {isOwner && (
             <Button type="submit" fullWidth loading={busy} size="lg">
@@ -139,7 +153,7 @@ export default function Profile() {
             </Button>
           )}
         </form>
-      </Card>
+      </section>
     </div>
   );
 }
