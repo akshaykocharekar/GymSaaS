@@ -10,18 +10,16 @@ import {
   LICENCE_PAYMENT_TYPE,
   GYM_STATUS,
   MAINTENANCE_DAYS,
+  LICENCE_PRICE_PAISE,
+  MAINTENANCE_PRICE_PAISE,
 } from "@gymora/shared";
-import { env } from "../env.js";
 
 export const webhookRoutes = new Hono();
 
 webhookRoutes.post("/razorpay", async (c) => {
   const signature = c.req.header("x-razorpay-signature") || "";
-
-  // Use raw clone to avoid body being consumed by earlier middleware (CORS).
   const rawBody = await c.req.raw.clone().text();
 
-  // Debug — remove these 4 lines after tests pass
   const valid = verifyWebhookSignature({ rawBody, signature });
 
   if (!valid) {
@@ -35,8 +33,7 @@ webhookRoutes.post("/razorpay", async (c) => {
     return c.json({ error: "Invalid JSON" }, 400);
   }
 
-  const eventId =
-    c.req.header("x-razorpay-event-id") || payload?.event_id;
+  const eventId = c.req.header("x-razorpay-event-id") || payload?.event_id;
   if (!eventId) return c.json({ error: "Missing event id" }, 400);
 
   const db = getDb();
@@ -81,11 +78,25 @@ webhookRoutes.post("/razorpay", async (c) => {
     try {
       rp = await fetchRazorpayPayment(paymentId);
     } catch {
-      // Fake/test payment id — Razorpay 404s. Accept signature+idempotency as proof,
-      // but DON'T upgrade the gym without real verification.
       return c.json({ ok: true, note: "payment not found in Razorpay" });
     }
-    if (rp.status !== "captured") return c.json({ ok: true });
+
+    // SECURITY: Verify status, order, and amount against our expected constants
+    const expectedAmount =
+      paymentType === LICENCE_PAYMENT_TYPE.SOFTWARE_PURCHASE
+        ? LICENCE_PRICE_PAISE
+        : MAINTENANCE_PRICE_PAISE;
+
+    if (
+      rp.status !== "captured" ||
+      rp.amount !== expectedAmount ||
+      rp.order_id !== orderId
+    ) {
+      console.error(
+        `[webhook] SECURITY REJECT: expected ${expectedAmount}, got ${rp.amount}`
+      );
+      return c.json({ ok: true });
+    }
 
     const now = new Date();
 
