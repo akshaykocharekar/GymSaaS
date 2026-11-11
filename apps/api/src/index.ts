@@ -24,7 +24,19 @@ import { startTrialCron } from "./lib/trialCron.js";
 
 const app = new Hono();
 
-app.use("*", cors());
+app.use(
+  "*",
+  cors({
+    origin: [
+      "http://localhost:3000", 
+      "https://palastra.pages.dev", 
+      "https://palastra.in"
+    ],
+    allowMethods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.onError(errorHandler);
 
 // ─── Health: fast, no DB ────────────────────────────────

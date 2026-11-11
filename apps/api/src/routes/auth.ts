@@ -21,6 +21,7 @@ import {
 } from "../templates/password-reset.js";
 import { env } from "../env.js";
 import { HTTPException } from "hono/http-exception";
+import { loginRateLimiter } from "../middleware/rateLimit.js";
 
 export const authRoutes = new Hono();
 
@@ -71,6 +72,7 @@ authRoutes.post("/register-gym", async (c) => {
     email: input.email.toLowerCase(),
     phone: input.phone,
     address: input.address,
+    logoUrl: null,
     status: GYM_STATUS.PENDING_APPROVAL,
     trialStartAt: null,
     trialExpiresAt: null,
@@ -105,7 +107,7 @@ authRoutes.post("/register-gym", async (c) => {
 });
 
 // ─── Login ──────────────────────────────────────────────
-authRoutes.post("/login", async (c) => {
+authRoutes.post("/login", loginRateLimiter, async (c) => {
   const body = await c.req.json();
   const input = loginSchema.parse(body);
   const db = getDb();
