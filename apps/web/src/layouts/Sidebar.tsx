@@ -67,6 +67,7 @@ export default function Sidebar() {
         ))}
       </nav>
       <div className="px-3 py-4 border-t border-white/5">
+        
         <button
           onClick={logout}
           className="w-full rounded-xl px-3.5 py-2.5 text-left text-sm font-medium text-stone-400 transition-colors hover:bg-rose-400/10 hover:text-rose-300"

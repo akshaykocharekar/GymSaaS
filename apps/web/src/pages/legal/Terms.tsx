@@ -2,170 +2,42 @@ import LegalLayout from "../../components/LegalLayout.js";
 
 export default function Terms() {
   return (
-    <LegalLayout title="Terms of Service" updated="9 November 2026">
-      <p>
-        These Terms of Service ("Terms") govern your use of Palastra, a gym
-        management software provided by Akshay Kocharekar, an individual sole
-        proprietor based in Margao, Goa, India ("Palastra", "we", "us", "our").
-      </p>
-      <p>
-        By registering for a Palastra account, accessing the platform, or using
-        any Palastra service, you agree to be bound by these Terms. If you do
-        not agree, please do not use Palastra.
-      </p>
-
-      <h2>1. Who can use Palastra</h2>
-      <p>
-        You must be at least 18 years of age and legally capable of entering
-        into binding contracts to use Palastra. By registering, you represent
-        that you own or manage a gym or fitness business and are authorised to
-        act on its behalf.
-      </p>
-
-      <h2>2. Your account</h2>
-      <ul>
-        <li>
-          You are responsible for keeping your login credentials confidential.
-        </li>
-        <li>
-          You must notify us immediately if you suspect any unauthorised access
-          to your account.
-        </li>
-        <li>
-          You are responsible for all activity that occurs under your account,
-          including activity by your staff.
-        </li>
-        <li>
-          We may suspend or terminate accounts that violate these Terms or that
-          we reasonably believe are fraudulent.
-        </li>
-      </ul>
-
-      <h2>3. Account approval and activation</h2>
-      <p>
-        All new gym registrations are reviewed before activation. We may reject
-        a registration for any reason at our discretion. Once approved, you
-        receive an activation code which must be entered to begin your 30-day
-        free trial.
-      </p>
-
-      <h2>4. Free trial</h2>
-      <p>
-        New accounts are eligible for a one-time 30-day free trial beginning
-        the day you activate your account. After the trial ends, you must
-        purchase a licence to continue using Palastra. Your data is preserved
-        if your trial expires, but access is restricted until payment is made.
-      </p>
-
-      <h2>5. Licence and payments</h2>
-      <p>
-        Palastra is licensed on a one-time payment basis. Current pricing:
-      </p>
-      <ul>
-        <li>₹1,999 one-time licence (includes 12 months of maintenance)</li>
-        <li>₹499/year maintenance from year 2 onwards (optional)</li>
-      </ul>
-      <p>
-        All payments are processed through Razorpay, our third-party payment
-        processor. We do not store your card or bank details. Prices are in
-        Indian Rupees (INR) and inclusive of applicable taxes.
-      </p>
-      <p>
-        We reserve the right to change pricing for new purchases at any time,
-        but existing licences are honoured at the price you paid.
-      </p>
-
-      <h2>6. Member limit</h2>
-      <p>
-        Each gym licence covers up to 500 active members under our fair-use
-        policy. If you need to manage more than 500 members, please contact us
-        to discuss an upgrade.
-      </p>
-
-      <h2>7. Acceptable use</h2>
-      <p>You agree not to:</p>
-      <ul>
-        <li>Use Palastra for any illegal purpose.</li>
-        <li>
-          Reverse engineer, decompile, or attempt to extract source code from
-          the Palastra software.
-        </li>
-        <li>
-          Resell, sublicense, or share your Palastra account with another gym
-          or business.
-        </li>
-        <li>
-          Use the platform to send unsolicited messages or spam to your members.
-        </li>
-        <li>
-          Interfere with the security or integrity of the platform or other
-          users' data.
-        </li>
-      </ul>
-
-      <h2>8. Your data and content</h2>
-      <p>
-        You own all data you enter into Palastra (member records, payments,
-        notes, etc.). We are a data processor acting on your instructions. You
-        are the data controller for your members' personal information under
-        India's DPDP Act.
-      </p>
-      <p>
-        You must obtain your members' consent before entering their personal
-        data into Palastra, and you are responsible for complying with all
-        applicable privacy laws.
-      </p>
-
-      <h2>9. Service availability</h2>
-      <p>
-        We aim to keep Palastra available at all times, but we do not guarantee
-        uninterrupted service. We may perform maintenance, push updates, or
-        experience outages due to infrastructure issues. Scheduled maintenance
-        will be announced in advance where possible.
-      </p>
-
-      <h2>10. Limitation of liability</h2>
-      <p>
-        To the maximum extent permitted by law, Palastra and Akshay Kocharekar
-        are not liable for any indirect, incidental, special, or consequential
-        damages arising from your use of the platform, including lost revenue,
-        lost data, or business interruption.
-      </p>
-      <p>
-        Our total liability for any claim related to Palastra is limited to the
-        amount you paid us in the 12 months preceding the claim.
-      </p>
-
-      <h2>11. Termination</h2>
-      <p>
-        You may stop using Palastra at any time. We may suspend or terminate
-        your account if you violate these Terms. Upon termination, you may
-        request an export of your data for up to 30 days after termination,
-        after which we may delete it.
-      </p>
-
-      <h2>12. Changes to these Terms</h2>
-      <p>
-        We may update these Terms from time to time. Material changes will be
-        notified via email or in-app. Continued use of Palastra after changes
-        means you accept the updated Terms.
-      </p>
-
-      <h2>13. Governing law</h2>
-      <p>
-        These Terms are governed by the laws of Margao, Goa, India. Any disputes will be
-        subject to the exclusive jurisdiction of the courts of Mumbai,
-        Maharashtra.
-      </p>
-
-      <h2>14. Contact</h2>
-      <p>
-        For questions about these Terms, contact us at{" "}
-        <a href="mailto:palastrasupport@gmail.com">
-          palastrasupport@gmail.com
-        </a>
-        .
-      </p>
+    <LegalLayout title="Terms of Service" updated="11 November 2026">
+      <p><strong>1. Business Identity</strong><br/>
+      PALASTRA is a trading name operated by Akshay Kocharekar, a Sole Proprietorship based in Margao, Goa, India.</p>
+      
+      <p><strong>2. Account Eligibility</strong><br/>
+      You must be at least 18 years of age to register a gym account. By registering, you represent that you have the legal authority to bind the gym or fitness business you represent to these Terms.</p>
+      
+      <p><strong>3. Account Approval</strong><br/>
+      All new gym registrations are subject to manual verification by PALASTRA. We reserve the right to reject suspicious, fraudulent, or incomplete registrations. If a payment has been collected prior to rejection, it will be refunded in accordance with our Refund & Cancellation Policy.</p>
+      
+      <p><strong>4. Free Trial</strong><br/>
+      New accounts receive a 30-day free trial starting from the moment the account is activated. This trial is limited to one per gym/business. There is no automatic paid subscription after the trial. If the trial expires without a purchase, access is restricted, but your data is preserved.</p>
+      
+      <p><strong>5. Licence and Pricing</strong><br/>
+      <strong>Initial Licence:</strong> ₹1,999 (One-time payment). Includes a perpetual software usage licence, 12 months of maintenance, one gym account, and up to 500 active members.<br/>
+      <strong>Annual Maintenance:</strong> ₹499/year starting from Year 2 onwards.</p>
+      
+      <p><strong>Maintenance Rules:</strong> The annual maintenance fee is <strong>Mandatory</strong> to keep your account active on the hosted platform. If maintenance is not renewed, PALASTRA may suspend access to the hosted application until the fee is paid. The gym retains ownership of its data and may request an export in accordance with our data policies.</p>
+      
+      <p><strong>6. Member Limit</strong><br/>
+      One licence supports up to 500 active members. An "active member" is defined as any member record where the membership expiry date is in the future. If you exceed 500 active members, you must contact PALASTRA to discuss an upgrade.</p>
+      
+      <p><strong>7. Acceptable Use</strong><br/>
+      You agree not to access another gym's data, bypass tenant isolation, send unauthorised bulk messaging, upload malicious code, or reverse engineer the software.</p>
+      
+      <p><strong>8. Data Ownership and Processing</strong><br/>
+      You (the Gym Owner) act as the Data Fiduciary for your members' personal information. PALASTRA acts as a Data Processor when handling this information on your behalf. You must have a legal basis for entering member information into our system.</p>
+      
+      <p><strong>9. Service Availability</strong><br/>
+      We aim to keep PALASTRA available, but we do not guarantee uninterrupted service. We are not liable for outages caused by planned maintenance, unexpected failures, or third-party infrastructure.</p>
+      
+      <p><strong>10. Limitation of Liability</strong><br/>
+      To the maximum extent permitted by law, PALASTRA is not liable for indirect or consequential damages. This limitation does not apply to fraud, wilful misconduct, or gross negligence.</p>
+      
+      <p><strong>11. Governing Law</strong><br/>
+      These Terms are governed by Indian law. Disputes are subject to the jurisdiction of the courts of Margao, Goa.</p>
     </LegalLayout>
   );
 }

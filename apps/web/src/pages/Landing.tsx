@@ -223,7 +223,7 @@ export default function Landing() {
   const faqs = [
     {
       q: "Is it really a one-time payment?",
-      a: "Yes. The ₹1,999 licence is a one-time payment, and it includes your entire first year of maintenance for free. Starting Year 2, there is a mandatory ₹499/year maintenance fee to keep your account active and supported.",
+      a: "Yes. The ₹1,999 licence is a one-time payment, and it includes your entire first year of maintenance for free. Starting Year 2, there is a mandatory ₹499/year maintenance fee to keep your account active and supported. Non-payment results in account suspension.",
     },
     {
       q: "Are there per-member charges?",
@@ -668,7 +668,7 @@ export default function Landing() {
             </p>
             <Link
               to="/register"
-              className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-stone-900 shadow-lg shadow-black/30 transition hover:bg-orange-300 active:scale-[0.98]"
+              className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold  shadow-lg shadow-black/30 transition hover:bg-orange-300 active:scale-[0.98]"
             >
               Register your business
               <IconArrow />
