@@ -21,8 +21,9 @@ export function trialGuard() {
 
     // Allowed statuses: ACTIVE_TRIAL or ACTIVE_PAID
     const allowed = [GYM_STATUS.ACTIVE_TRIAL, GYM_STATUS.ACTIVE_PAID];
+    
     if (allowed.includes(gym.status)) {
-      // If trial, check expiry
+      // 1. Check Trial Expiry
       if (
         gym.status === GYM_STATUS.ACTIVE_TRIAL &&
         gym.trialExpiresAt &&
@@ -33,6 +34,19 @@ export function trialGuard() {
           cause: { code: "TRIAL_EXPIRED" },
         });
       }
+
+      // 2. Check Maintenance Expiry (ACTIVE_PAID only)
+      if (
+        gym.status === GYM_STATUS.ACTIVE_PAID &&
+        gym.licenceExpiresAt &&
+        new Date(gym.licenceExpiresAt).getTime() < Date.now()
+      ) {
+        throw new HTTPException(402, {
+          message: "Annual maintenance expired. Please renew to continue.",
+          cause: { code: "MAINTENANCE_EXPIRED" },
+        });
+      }
+
       return next();
     }
 

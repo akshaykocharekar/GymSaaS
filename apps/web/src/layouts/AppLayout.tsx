@@ -13,7 +13,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-[#0c0a09]">
       <div className="flex">
-        {/* Desktop Sidebar (hidden on mobile) */}
+        {/* Desktop Sidebar */}
         <Sidebar />
         
         {/* Main Content Area */}
@@ -42,7 +42,8 @@ export default function AppLayout() {
 
           <TrialBanner />
           
-          <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-4 lg:py-6">
+          {/* REMOVED max-w-6xl mx-auto to let it stretch full width */}
+          <main className="w-full px-4 sm:px-6 lg:px-8 py-6">
             <Outlet />
           </main>
         </div>

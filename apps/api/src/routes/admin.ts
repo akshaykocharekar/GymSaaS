@@ -68,7 +68,7 @@ adminRoutes.get("/stats", async (c) => {
   });
 });
 
-// ─── Pending registrations (kept for compat) ───────────
+// ─── Pending registrations ─────────────────────────────
 adminRoutes.get("/gyms/pending", async (c) => {
   const gyms = new GymRepo(getDb());
   const list = await gyms.listByStatus(GYM_STATUS.PENDING_APPROVAL);
@@ -193,24 +193,13 @@ adminRoutes.post("/gyms/:id/approve", async (c) => {
     activationCodeUsedAt: null,
   });
 
-  // Fire-and-forget email (never blocks the response)
   sendEmail({
     to: gym.email,
     toName: gym.ownerName,
     subject: `Your Palastra activation code: ${code}`,
-    htmlContent: activationCodeEmailHtml({
-      gymName: gym.name,
-      ownerName: gym.ownerName,
-      code,
-      expiresAt,
-    }),
-    textContent: activationCodeEmailText({
-      gymName: gym.name,
-      ownerName: gym.ownerName,
-      code,
-      expiresAt,
-    }),
-  }).catch((err) => console.error("[admin] email send failed:", err));
+    htmlContent: activationCodeEmailHtml({ gymName: gym.name, ownerName: gym.ownerName, code, expiresAt }),
+    textContent: activationCodeEmailText({ gymName: gym.name, ownerName: gym.ownerName, code, expiresAt }),
+  }).catch((err) => console.error("[admin] approve email failed:", err));
 
   return c.json({
     ok: true,
@@ -254,7 +243,7 @@ adminRoutes.post("/gyms/:id/suspend", async (c) => {
   return c.json({ ok: true, message: "Gym suspended" });
 });
 
-// ─── Reactivate (only from SUSPENDED) ──────────────────
+// ─── Reactivate ────────────────────────────────────────
 adminRoutes.post("/gyms/:id/reactivate", async (c) => {
   const id = c.req.param("id");
   const gyms = new GymRepo(getDb());
@@ -275,7 +264,7 @@ adminRoutes.post("/gyms/:id/reactivate", async (c) => {
   return c.json({ ok: true, status: newStatus });
 });
 
-// ─── Resend activation code ────────────────────────────
+// ─── Resend activation code (FIXED) ────────────────────
 adminRoutes.post("/gyms/:id/resend-code", async (c) => {
   const id = c.req.param("id");
   const gyms = new GymRepo(getDb());
@@ -298,6 +287,15 @@ adminRoutes.post("/gyms/:id/resend-code", async (c) => {
     activationCodeExpiresAt: expiresAt,
     activationCodeUsedAt: null,
   });
+
+  // ACTUALLY SEND THE EMAIL
+  sendEmail({
+    to: gym.email,
+    toName: gym.ownerName,
+    subject: `Your new Palastra activation code: ${code}`,
+    htmlContent: activationCodeEmailHtml({ gymName: gym.name, ownerName: gym.ownerName, code, expiresAt }),
+    textContent: activationCodeEmailText({ gymName: gym.name, ownerName: gym.ownerName, code, expiresAt }),
+  }).catch((err) => console.error("[admin] resend email failed:", err));
 
   return c.json({
     ok: true,

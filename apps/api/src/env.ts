@@ -23,7 +23,7 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().email().default("palastrasupport@gmail.com"),
   EMAIL_FROM_NAME: z.string().default("Palastra"),
   // Web app URL — used for links inside emails
-  WEB_APP_URL: z.string().default("http://localhost:3000"),
+  WEB_APP_URL: z.string().default("https://palastra.pages.dev"),
 });
 
 const parsed = envSchema.safeParse(process.env);

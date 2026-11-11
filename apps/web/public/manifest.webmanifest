@@ -1,7 +1,7 @@
 {
-  "name": "Palastra",
+  "name": "Palastra — Gym & Studio Management",
   "short_name": "Palastra",
-  "description": "Manage members, payments, renewals for your gym.",
+  "description": "Manage members, payments, and renewals in one place. Built for independent gyms and studios in India.",
   "start_url": "/app/dashboard",
   "scope": "/",
   "display": "standalone",
@@ -10,41 +10,22 @@
   "theme_color": "#0c0a09",
   "icons": [
     {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
       "purpose": "any"
     },
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "purpose": "any maskable"
     }
   ]
 }
