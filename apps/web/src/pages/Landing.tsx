@@ -169,7 +169,7 @@ function SectionHead({
 const marquee = [
   "Members",
   "Renewals",
-  "UPI payments",
+  "Cash & UPI records",
   "WhatsApp reminders",
   "Expiry tracking",
   "Reports",
@@ -200,12 +200,13 @@ export default function Landing() {
     { icon: <IconCard />, title: "Payment records", desc: "Record cash, UPI, and other payments. Track advances.", span: "", wide: false },
     { icon: <IconChart />, title: "Reports", desc: "Revenue, dues, plan mix, new joins, renewals.", span: "sm:col-span-2 lg:col-span-2", wide: true },
     { icon: <IconMessage />, title: "WhatsApp reminders", desc: "One-tap personalised messages for expiries and dues.", span: "", wide: false },
-    { icon: <IconPhone />, title: "Mobile-first", desc: "Designed for the gym floor, not a back office desk.", span: "lg:col-span-2", wide: true },
+    { icon: <IconPhone />, title: "Mobile-first", desc: "Designed for the gym floor or the studio, not a back office.", span: "lg:col-span-2", wide: true },
   ];
 
   const compare = [
     ["Pricing", "₹1,999 one-time", "₹999/month"],
-    ["Annual cost", "₹499", "₹11,988"],
+    ["Year 1 maintenance", "Free", "Extra cost"],
+    ["Year 2+ maintenance", "₹499/year", "₹11,988/year"],
     ["Per-member fees", "None", "Often"],
     ["Member limit", "500 (fair use)", "Capped by plan"],
     ["WhatsApp reminders", "Included", "Extra cost"],
@@ -213,16 +214,16 @@ export default function Landing() {
   ];
 
   const steps = [
-    { n: "01", title: "Register", desc: "Tell us about your gym." },
+    { n: "01", title: "Register", desc: "Tell us about your gym or studio." },
     { n: "02", title: "Get approved", desc: "Receive an activation code by email." },
     { n: "03", title: "Start trial", desc: "30 days free. Add members, plans, payments." },
-    { n: "04", title: "Go live", desc: "₹1,999 licence, then ₹499/year maintenance." },
+    { n: "04", title: "Go live", desc: "₹1,999 licence. Year 1 maintenance is free." },
   ];
 
   const faqs = [
     {
-      q: "Is it a one-time payment?",
-      a: "The ₹1,999 licence is a one-time payment. There is also a mandatory maintenance fee of ₹499/year, which covers hosting, security updates, and support and keeps your account active. There are no monthly or per-member fees.",
+      q: "Is it really a one-time payment?",
+      a: "Yes. The ₹1,999 licence is a one-time payment, and it includes your entire first year of maintenance for free. Starting Year 2, there is a mandatory ₹499/year maintenance fee to keep your account active and supported.",
     },
     {
       q: "Are there per-member charges?",
@@ -230,7 +231,7 @@ export default function Landing() {
     },
     {
       q: "How does the free trial work?",
-      a: "After we approve your gym, you get a 30-day trial. After 30 days, purchase the licence to keep using Palastra. Your data stays safe either way.",
+      a: "After we approve your business, you get a 30-day trial. After 30 days, purchase the ₹1,999 licence to keep using Palastra. Your data stays safe either way.",
     },
     {
       q: "Can I collect member payments through Palastra?",
@@ -242,7 +243,7 @@ export default function Landing() {
     },
     {
       q: "Can I add staff accounts?",
-      a: "Yes. One optional staff account per gym, with permissions you control. More roles are on the roadmap.",
+      a: "Yes. One optional staff account per business, with permissions you control. More roles are on the roadmap.",
     },
   ];
 
@@ -285,9 +286,7 @@ export default function Landing() {
       <header className="sticky top-0 z-40 border-b border-white/5 bg-[#0c0a09]/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 h-14 sm:h-16 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight text-white">
-            <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-orange-300 to-orange-500 text-orange-950 text-sm font-bold shadow-md shadow-orange-500/30">
-              G
-            </span>
+            <img src="/logo.svg" alt="Palastra" className="h-7 w-7 drop-shadow-md" />
             Palastra
           </Link>
 
@@ -303,7 +302,7 @@ export default function Landing() {
             </Link>
             <Link
               to="/register"
-              className="px-3.5 py-2 text-sm font-semibold bg-white text-stone-900 rounded-full hover:bg-orange-300 transition-colors"
+              className="px-3.5 py-2 text-sm font-semibold bg-white  rounded-full hover:bg-orange-300 transition-colors"
             >
               Get started
             </Link>
@@ -313,7 +312,6 @@ export default function Landing() {
 
       {/* ─── Hero ─────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden">
-        {/* background: grid + rings + drifting glows */}
         <div aria-hidden="true" className="absolute inset-0 -z-10 opacity-[0.35]" style={GRID_STYLE} />
         <div
           aria-hidden="true"
@@ -345,7 +343,7 @@ export default function Landing() {
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-orange-400" />
               </span>
-              Gym management for independent gyms in India
+              Gym & Studio management for businesses in India
             </div>
 
             <h1 className="mt-6 text-[2.6rem] sm:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.02] text-white">
@@ -364,7 +362,7 @@ export default function Landing() {
 
             <p className="mt-6 text-base sm:text-lg text-stone-400 leading-relaxed max-w-xl mx-auto">
               Manage members, memberships, payments, and renewals in one
-              place. Built for gym owners who&apos;d rather coach than chase
+              place. Built for gym and studio owners who&apos;d rather coach than chase
               dues.
             </p>
 
@@ -387,7 +385,7 @@ export default function Landing() {
             <div className="mt-12 grid grid-cols-3 gap-3 w-full max-w-lg">
               {[
                 ["₹1,999", "one-time"],
-                ["₹499", "/year maintenance"],
+                ["₹499", "/year from Year 2"],
                 ["No", "monthly fees"],
               ].map(([big, small]) => (
                 <div
@@ -423,7 +421,7 @@ export default function Landing() {
         <Reveal>
           <SectionHead eyebrow="What it does" title="The essentials, done well.">
             No bloated dashboards. No features you&apos;ll never use. Just the
-            tools a small gym actually needs to stay organised.
+            tools a small business actually needs to stay organised.
           </SectionHead>
         </Reveal>
 
@@ -454,7 +452,7 @@ export default function Landing() {
       <section className="border-y border-white/5 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-20 sm:py-28">
           <Reveal>
-            <SectionHead eyebrow="Why Palastra" title="Built for gyms, not enterprises.">
+            <SectionHead eyebrow="Why Palastra" title="Built for gyms & studios, not enterprises.">
               Most gym software is priced like enterprise HR software. Palastra
               isn&apos;t.
             </SectionHead>
@@ -497,7 +495,7 @@ export default function Landing() {
         <Reveal>
           <SectionHead eyebrow="Pricing" title="Honest pricing. No surprises.">
             A one-time licence fee, plus a small mandatory yearly maintenance
-            fee. No monthly charges and no per-member fees.
+            fee from Year 2 onwards.
           </SectionHead>
         </Reveal>
 
@@ -523,7 +521,7 @@ export default function Landing() {
                     "Unlimited members (500 fair-use cap)",
                     "All features, no upsells",
                     "30-day free trial after approval",
-                    "No monthly fees, ever",
+                    "Includes Year 1 maintenance",
                   ].map((b) => (
                     <li key={b} className="flex items-start gap-2.5 text-stone-300">
                       <span className="text-orange-400 mt-0.5 shrink-0">
@@ -548,7 +546,7 @@ export default function Landing() {
               <div className="flex items-center justify-between">
                 <div className="text-sm font-medium text-stone-400">Annual maintenance</div>
                 <span className="rounded-full bg-amber-400/10 px-2.5 py-1 text-[11px] font-medium text-amber-300 ring-1 ring-amber-400/25">
-                  Mandatory
+                  From Year 2
                 </span>
               </div>
               <div className="mt-4 flex items-baseline gap-1.5">
@@ -560,7 +558,7 @@ export default function Landing() {
                   "Hosting and infrastructure",
                   "Security updates",
                   "Bug fixes and support",
-                  "Required to keep your account active",
+                  "Keeps your account active",
                 ].map((b) => (
                   <li key={b} className="flex items-start gap-2.5 text-stone-300">
                     <span className="text-orange-400 mt-0.5 shrink-0">
@@ -571,7 +569,7 @@ export default function Landing() {
                 ))}
               </ul>
               <div className="mt-8 rounded-full border border-dashed border-white/10 py-3 text-center text-xs text-stone-500">
-                Billed after your first year
+                Waived in Year 1
               </div>
             </div>
           </Reveal>
@@ -581,7 +579,7 @@ export default function Landing() {
           <div className="mt-6 grid max-w-3xl grid-cols-3 divide-x divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
             {[
               ["₹1,999", "one-time licence"],
-              ["₹499", "per year, mandatory"],
+              ["₹0", "maintenance in Year 1"],
               ["₹0", "monthly or per-member"],
             ].map(([big, small]) => (
               <div key={big} className="px-3 py-4 text-center sm:px-5">
@@ -663,7 +661,7 @@ export default function Landing() {
               style={{ background: "rgba(252,211,77,0.12)" }}
             />
             <h2 className="max-w-2xl text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.08] text-white">
-              Ready to run a tighter gym?
+              Ready to run a tighter gym or studio?
             </h2>
             <p className="mt-4 text-stone-400 sm:text-lg">
               Free 30-day trial. No credit card. No monthly fees.
@@ -672,7 +670,7 @@ export default function Landing() {
               to="/register"
               className="group mt-8 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 font-semibold text-stone-900 shadow-lg shadow-black/30 transition hover:bg-orange-300 active:scale-[0.98]"
             >
-              Register your gym
+              Register your business
               <IconArrow />
             </Link>
           </div>
@@ -684,7 +682,7 @@ export default function Landing() {
         <div className="max-w-6xl mx-auto px-5 sm:px-8 py-10 flex flex-col sm:flex-row justify-between gap-8 text-sm text-stone-500">
           <div className="max-w-xs">
             <div className="flex items-center gap-2 font-semibold text-white mb-1"><img src="/logo.svg" alt="Palastra" className="h-5 w-5 drop-shadow-md" /> Palastra</div>
-            <div>Built for independent gyms in India.</div>
+            <div>Built for independent gyms and studios in India.</div>
             <div className="mt-3 text-xs text-stone-600">
               Operated by Akshay Kocharekar
             </div>
