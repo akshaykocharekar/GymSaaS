@@ -1,4 +1,5 @@
 import { Route, Routes, Navigate } from "react-router-dom";
+import SplashScreen from "./components/SplashScreen.js";
 import Landing from "./pages/Landing.js";
 import Terms from "./pages/legal/Terms.js";
 import Privacy from "./pages/legal/Privacy.js";
@@ -39,7 +40,9 @@ import AdminLayout from "./layouts/AdminLayout.js";
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      <SplashScreen />
+      <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/legal/terms" element={<Terms />} />
       <Route path="/legal/privacy" element={<Privacy />} />
@@ -101,5 +104,6 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

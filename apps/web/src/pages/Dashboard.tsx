@@ -1,6 +1,5 @@
 import { useEffect, useState, ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.js";
 import { api } from "../lib/api.js";
 
 interface RecentPayment {
@@ -41,7 +40,6 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
   const [range, setRange] = useState<Range>("1m");
   const [data, setData] = useState<DashData | null>(null);
 
@@ -58,7 +56,6 @@ export default function Dashboard() {
       });
   }, [range]);
 
-  // Desktop-only: revenue split
   const revTotal = data ? data.revenue.membership + data.revenue.session : 0;
   const membershipPct = data && revTotal > 0 ? (data.revenue.membership / revTotal) * 100 : 0;
   const sessionPct = revTotal > 0 ? 100 - membershipPct : 0;
@@ -91,32 +88,17 @@ export default function Dashboard() {
     </p>
   );
 
-  // Desktop-only: members health bar
   const total = data?.counts.total ?? 0;
   const activePct = data && total > 0 ? (data.counts.active / total) * 100 : 0;
   const expiredPct = data && total > 0 ? (data.counts.expired / total) * 100 : 0;
 
   return (
     <div className="max-w-4xl lg:max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-10 space-y-8 lg:space-y-10">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <div className="text-sm text-stone-500">Welcome back</div>
-          <h1 className="text-3xl lg:text-4xl font-semibold tracking-tight text-white">
-            {user?.name}
-          </h1>
-        </div>
-        <div className="hidden sm:block pb-1 text-sm text-stone-500">
-          {new Date().toLocaleDateString("en-IN", {
-            weekday: "long",
-            day: "numeric",
-            month: "long",
-          })}
-        </div>
-      </div>
-
+      
       <div className="space-y-8 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-8 lg:items-start">
         {/* Main column */}
         <div className="flex flex-col gap-8 lg:gap-12 lg:col-span-8 min-w-0">
+          
           {/* Members */}
           <div>
             <div className="mb-3">
@@ -175,7 +157,7 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Revenue with range selector (first on desktop) */}
+          {/* Revenue with range selector */}
           <div className="lg:order-first">
             <div className="flex items-center justify-between gap-3 mb-3">
               <SectionLabel>Revenue</SectionLabel>
@@ -244,7 +226,8 @@ export default function Dashboard() {
 
         {/* Side column: sticky on desktop */}
         <div className="space-y-6 lg:col-span-4 lg:sticky lg:top-6 min-w-0">
-          {/* Needs attention (desktop only) */}
+          
+          {/* Needs attention */}
           <section className="hidden lg:block rounded-2xl border border-white/10 bg-white/[0.03] p-6">
             <div className="font-semibold text-white mb-3">Needs attention</div>
             {!data ? (

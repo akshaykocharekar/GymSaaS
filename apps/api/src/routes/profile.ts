@@ -29,6 +29,7 @@ profileRoutes.get("/", async (c) => {
       email: gym.email,
       phone: gym.phone,
       address: gym.address,
+      logoUrl: gym.logoUrl || null,
       status: gym.status,
       trialExpiresAt: gym.trialExpiresAt,
       licenceExpiresAt: gym.licenceExpiresAt,

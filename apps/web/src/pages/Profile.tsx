@@ -13,6 +13,7 @@ interface GymProfile {
   email: string;
   phone: string;
   address: string;
+  logoUrl: string | null;
 }
 
 export default function Profile() {
