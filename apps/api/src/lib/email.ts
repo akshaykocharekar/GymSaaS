@@ -1,4 +1,5 @@
 import { env } from "../env.js";
+import { getDb } from "@gymora/db";
 
 interface SendEmailParams {
   to: string;
@@ -21,6 +22,9 @@ interface BrevoSendResponse {
 export async function sendEmail(params: SendEmailParams): Promise<boolean> {
   if (!env.BREVO_API_KEY) {
     console.warn("[email] BREVO_API_KEY not set — skipping send");
+    console.warn("[email] PENDING EMAIL → to:", params.to, "| subject:", params.subject);
+    console.warn("[email] PENDING EMAIL → text:", params.textContent || stripHtml(params.htmlContent));
+    await queuePendingEmail(params, "BREVO_API_KEY missing");
     return false;
   }
 
@@ -47,6 +51,9 @@ export async function sendEmail(params: SendEmailParams): Promise<boolean> {
     if (!res.ok) {
       const body = await res.text();
       console.error(`[email] Brevo failed (${res.status}):`, body);
+      console.error("[email] PENDING EMAIL → to:", params.to, "| subject:", params.subject);
+      console.error("[email] PENDING EMAIL → text:", params.textContent || stripHtml(params.htmlContent));
+      await queuePendingEmail(params, `Brevo ${res.status}: ${body.slice(0, 200)}`);
       return false;
     }
 
@@ -55,7 +62,29 @@ export async function sendEmail(params: SendEmailParams): Promise<boolean> {
     return true;
   } catch (err) {
     console.error("[email] send error:", err);
+    console.error("[email] PENDING EMAIL → to:", params.to, "| subject:", params.subject);
+    console.error("[email] PENDING EMAIL → text:", params.textContent || stripHtml(params.htmlContent));
+    await queuePendingEmail(params, `exception: ${String(err).slice(0, 200)}`);
     return false;
+  }
+}
+
+async function queuePendingEmail(params: SendEmailParams, reason: string): Promise<void> {
+  try {
+    const db = getDb();
+    await db.collection("pending_emails").insertOne({
+      to: params.to,
+      toName: params.toName || params.to,
+      subject: params.subject,
+      htmlContent: params.htmlContent,
+      textContent: params.textContent || stripHtml(params.htmlContent),
+      reason,
+      sent: false,
+      attempts: 0,
+      createdAt: new Date(),
+    });
+  } catch (e) {
+    console.error("[email] failed to queue pending email:", e);
   }
 }
 

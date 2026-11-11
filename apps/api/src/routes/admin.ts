@@ -340,4 +340,66 @@ adminRoutes.get("/licence-payments", async (c) => {
       createdAt: p.createdAt,
     })),
   });
+
+// ─── Pending emails (fallback when Brevo fails) ────────
+adminRoutes.get("/emails/pending", async (c) => {
+  const db = getDb();
+  const docs = await db
+    .collection("pending_emails")
+    .find({ sent: false })
+    .sort({ createdAt: -1 })
+    .limit(200)
+    .toArray();
+  return c.json({
+    ok: true,
+    emails: docs.map((e: any) => ({
+      id: e._id.toString(),
+      to: e.to,
+      toName: e.toName,
+      subject: e.subject,
+      textContent: e.textContent,
+      reason: e.reason,
+      attempts: e.attempts,
+      createdAt: e.createdAt,
+    })),
+  });
+});
+
+adminRoutes.post("/emails/:id/retry", async (c) => {
+  const db = getDb();
+  const doc = await db
+    .collection("pending_emails")
+    .findOne({ _id: new ObjectId(c.req.param("id")) });
+  if (!doc) throw new HTTPException(404, { message: "Not found" });
+
+  const ok = await sendEmail({
+    to: doc.to,
+    toName: doc.toName,
+    subject: doc.subject,
+    htmlContent: doc.htmlContent,
+    textContent: doc.textContent,
+  });
+
+  if (ok) {
+    await db.collection("pending_emails").updateOne(
+      { _id: doc._id },
+      { $set: { sent: true, sentAt: new Date() }, $inc: { attempts: 1 } }
+    );
+  } else {
+    await db
+      .collection("pending_emails")
+      .updateOne({ _id: doc._id }, { $inc: { attempts: 1 } });
+  }
+  return c.json({ ok, sent: ok });
+});
+
+adminRoutes.post("/emails/:id/mark-sent", async (c) => {
+  const db = getDb();
+  await db.collection("pending_emails").updateOne(
+    { _id: new ObjectId(c.req.param("id")) },
+    { $set: { sent: true, sentAt: new Date(), manual: true } }
+  );
+  return c.json({ ok: true });
+});
+
 });
