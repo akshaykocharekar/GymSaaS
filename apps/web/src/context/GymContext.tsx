@@ -8,6 +8,7 @@ export interface GymProfile {
   email: string;
   phone: string;
   address: string;
+  logoUrl?: string | null;
   status: string;
   trialExpiresAt: string | null;
 }

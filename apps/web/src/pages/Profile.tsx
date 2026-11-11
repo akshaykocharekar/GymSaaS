@@ -20,7 +20,7 @@ export default function Profile() {
   const { refresh } = useGym();
   const toast = useToast();
   const [gym, setGym] = useState<GymProfile | null>(null);
-  const [form, setForm] = useState({ name: "", ownerName: "", phone: "", address: "" });
+  const [form, setForm] = useState({ name: "", ownerName: "", phone: "", address: "", logoUrl: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,6 +36,7 @@ export default function Profile() {
           ownerName: res.gym.ownerName,
           phone: res.gym.phone,
           address: res.gym.address,
+          logoUrl: res.gym.logoUrl || "",
         });
       });
   }, []);
@@ -129,6 +130,16 @@ export default function Profile() {
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
             disabled={!isOwner}
             required
+          />
+          <FormField
+            label="Gym Logo URL (optional)"
+            name="logoUrl"
+            value={form.logoUrl}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, logoUrl: e.target.value }))
+            }
+            placeholder="https://example.com/logo.png"
+            disabled={!isOwner}
           />
           <FormField
             label="Address"

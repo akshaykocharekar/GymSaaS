@@ -9,6 +9,7 @@ export interface GymDoc {
   email: string;
   phone: string;
   address: string;
+  logoUrl: string | null;
   status: GymStatus;
   trialStartAt: Date | null;
   trialExpiresAt: Date | null;

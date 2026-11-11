@@ -22,13 +22,7 @@ webhookRoutes.post("/razorpay", async (c) => {
   const rawBody = await c.req.raw.clone().text();
 
   // Debug — remove these 4 lines after tests pass
-  console.log("=== WEBHOOK DEBUG ===");
-  console.log("signature len:", signature.length);
-  console.log("rawBody len:", rawBody.length);
-  console.log("secret len:", env.RAZORPAY_WEBHOOK_SECRET?.length);
-
   const valid = verifyWebhookSignature({ rawBody, signature });
-  console.log("signature valid:", valid);
 
   if (!valid) {
     return c.json({ error: "Invalid webhook signature" }, 400);

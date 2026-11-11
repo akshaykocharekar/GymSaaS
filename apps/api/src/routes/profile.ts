@@ -45,6 +45,7 @@ const patchSchema = z.object({
     .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit Indian mobile number")
     .optional(),
   address: z.string().trim().min(5).max(300).optional(),
+  logoUrl: z.string().trim().url().optional().or(z.literal("")),
 });
 
 profileRoutes.patch("/", async (c) => {
